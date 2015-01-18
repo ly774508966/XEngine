@@ -68,13 +68,13 @@ protected:
 
 // Smart pointers. The  template T  must be derived from XRefObject.
 template < typename T >
-class TSmartPointer
+class XSmartPointer
 {
 public:
     // construction and destruction
-    TSmartPointer(T* pObject = (T*) 0);
-    TSmartPointer(const TSmartPointer& ptr);
-    ~TSmartPointer();
+    XSmartPointer(T* pObject = (T*) 0);
+    XSmartPointer(const XSmartPointer& ptr);
+    ~XSmartPointer();
 
     // implicit conversions
     operator T*() const;
@@ -82,31 +82,31 @@ public:
     T* operator->() const;
 
     // assignment
-    TSmartPointer& operator=(const TSmartPointer& ptr);
-    TSmartPointer& operator=(T* pObject);
+    XSmartPointer& operator=(const XSmartPointer& ptr);
+    XSmartPointer& operator=(T* pObject);
 
     // comparisons
     bool operator==(T* pObject) const;
     bool operator!=(T* pObject) const;
-    bool operator==(const TSmartPointer& ptr) const;
-    bool operator!=(const TSmartPointer& ptr) const;
+    bool operator==(const XSmartPointer& ptr) const;
+    bool operator!=(const XSmartPointer& ptr) const;
 
 protected:
     // the managed pointer
     T* m_pObject;
 };
 
-#define DefSmartPointer(classname) \
+#define X_DefSmartPointer(classname) \
 class classname; \
-typedef TSmartPointer<classname> classname##Ptr
+typedef XSmartPointer<classname> classname##Ptr
 
 // Use for casting a smart pointer of one type to a pointer or smart pointer
 // of another type.
-#define SmartPointerCast(type, smartptr) ((type*) (void*) (smartptr))
+#define X_SmartPointerCast(type, smartptr) ((type*) (void*) (smartptr))
 
 //---------------------------------------------------------------------------
 template < typename T >
-inline TSmartPointer<T >::TSmartPointer(T* pObject)
+inline XSmartPointer<T >::XSmartPointer(T* pObject)
 {
     m_pObject = pObject;
     if (m_pObject)
@@ -114,7 +114,7 @@ inline TSmartPointer<T >::TSmartPointer(T* pObject)
 }
 //---------------------------------------------------------------------------
 template < typename T >
-inline TSmartPointer<T>::TSmartPointer(const TSmartPointer& ptr)
+inline XSmartPointer<T>::XSmartPointer(const XSmartPointer& ptr)
 {
     m_pObject = ptr.m_pObject;
     if (m_pObject)
@@ -122,32 +122,32 @@ inline TSmartPointer<T>::TSmartPointer(const TSmartPointer& ptr)
 }
 //---------------------------------------------------------------------------
 template < typename T >
-inline TSmartPointer<T>::~TSmartPointer()
+inline XSmartPointer<T>::~XSmartPointer()
 {
     if (m_pObject)
         m_pObject->release();
 }
 //---------------------------------------------------------------------------
 template < typename T >
-inline TSmartPointer<T>::operator T*() const
+inline XSmartPointer<T>::operator T*() const
 {
     return m_pObject;
 }
 //---------------------------------------------------------------------------
 template < typename T >
-inline T& TSmartPointer<T>::operator*() const
+inline T& XSmartPointer<T>::operator*() const
 {
     return *m_pObject;
 }
 //---------------------------------------------------------------------------
 template < typename T >
-inline T* TSmartPointer<T>::operator->() const
+inline T* XSmartPointer<T>::operator->() const
 {
     return m_pObject;
 }
 //---------------------------------------------------------------------------
 template < typename T >
-inline TSmartPointer<T>& TSmartPointer<T>::operator=(const TSmartPointer& ptr)
+inline XSmartPointer<T>& XSmartPointer<T>::operator=(const XSmartPointer& ptr)
 {
     if (m_pObject != ptr.m_pObject)
     {
@@ -161,7 +161,7 @@ inline TSmartPointer<T>& TSmartPointer<T>::operator=(const TSmartPointer& ptr)
 }
 //---------------------------------------------------------------------------
 template < typename T >
-inline TSmartPointer<T>& TSmartPointer<T>::operator=(T* pObject)
+inline XSmartPointer<T>& XSmartPointer<T>::operator=(T* pObject)
 {
     if (m_pObject != pObject)
     {
@@ -175,25 +175,25 @@ inline TSmartPointer<T>& TSmartPointer<T>::operator=(T* pObject)
 }
 //---------------------------------------------------------------------------
 template < typename T >
-inline bool TSmartPointer<T>::operator==(T* pObject) const
+inline bool XSmartPointer<T>::operator==(T* pObject) const
 {
     return (m_pObject == pObject);
 }
 //---------------------------------------------------------------------------
 template < typename T >
-inline bool TSmartPointer<T>::operator!=(T* pObject) const
+inline bool XSmartPointer<T>::operator!=(T* pObject) const
 {
     return (m_pObject != pObject);
 }
 //---------------------------------------------------------------------------
 template < typename T >
-inline bool TSmartPointer<T>::operator==(const TSmartPointer& ptr) const
+inline bool XSmartPointer<T>::operator==(const XSmartPointer& ptr) const
 {
     return (m_pObject == ptr.m_pObject);
 }
 //---------------------------------------------------------------------------
 template < typename T >
-inline bool TSmartPointer<T>::operator!=(const TSmartPointer& ptr) const
+inline bool XSmartPointer<T>::operator!=(const XSmartPointer& ptr) const
 {
     return (m_pObject != ptr.m_pObject);
 }

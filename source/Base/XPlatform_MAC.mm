@@ -43,9 +43,4 @@ const XPath& XPath::getHomePath()
     return s_kHomePath;
 }
 
-XVoid XLogger::trace( const XChar* log )
-{
-    NSLog( @"%s", log );
-}
-
 X_NS_END

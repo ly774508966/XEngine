@@ -135,4 +135,12 @@
 #endif
 
 
+// define trace.
+#if defined( X_OS_WIN )
+#   define X_TRACE( msg )   OutputDebugStringA( msg )
+#else
+// print( msg ) will give a warning : "format string is not a string literal".
+#   define X_TRACE( msg )   printf( "%s", msg )
+#endif
+
 #endif // __XPLATFORM_H__

@@ -30,6 +30,7 @@
 #define __XLOGGER_H__
 
 #include "XPreDef.h"
+#include "XSmartPointer.h"
 
 X_NS_BEGIN
 
@@ -42,36 +43,17 @@ enum eLogLevel
     LL_ALL		= LL_DEBUG | LL_INFO | LL_WARNING | LL_ERROR,
 };
 
-
-class X_API XLogListener
+struct XLogElement
 {
-public:
-    
-    virtual ~XLogListener() {}
-    
-    virtual XVoid		onLog( const XString& strLog ) = 0;
+    XString strSection;
+    eLogLevel level;
+    XString strLog;
+    XString strFile;
+    XString strFunction;
+    XUInt32 uiLine;
 };
 
-
-class X_API XLog2Console:
-public XLogListener
-{
-public:
-    virtual XVoid		onLog( const XString& strLog );
-};
-
-
-class X_API XLogFormater
-{
-public:
-    virtual XString     format( const XString& strSection,
-                               eLogLevel level,
-                               const XString& strLog,
-                               const XChar* strFile,
-                               const XChar* strFunction,
-                               XUInt32 uiLine ) = 0;
-};
-
+class XLogListener;
 class X_API XLogger
 {
 
@@ -82,9 +64,8 @@ protected:
      */
     XUInt32             m_uiFilter;
     
-    XLogFormater*       m_pkCurLogFormater;
-    
-    std::vector< XLogListener* >	m_vecListeners;
+    XLogListener*       m_pkListener;
+    std::vector< XLogElement >  m_vecBuffedLog;
 public:
     XLogger();
     
@@ -93,17 +74,71 @@ public:
     XVoid				log( const XString& strSection,
                             eLogLevel level,
                             const XString& strLog,
-                            const XChar* strFile,
-                            const XChar* strFunction,
+                            const XString& strFile,
+                            const XString& strFunction,
                             XUInt32 uiLine );
-    XRet				registerListener( XLogListener* pkListener );
-    XRet				unregisterListener( XLogListener* pkListener );
+    
+    XVoid               setListener( XLogListener* pkLinstener );
+    XLogListener*       getListener() { return m_pkListener; }
     
     static XLogger&     getIns() { static XLogger s_kIns; return s_kIns; }
-    static XVoid        trace( const XChar* log );
+};
+
+class X_API XLogListener
+{
+public:
+    
+    virtual ~XLogListener() {}
+    
+    virtual XVoid		onLog( const XLogElement& kLog ) = 0;
 };
 
 
+// format log by pattern.
+/*
+ %d : data
+    option :
+     {  %y : year
+        %m : month
+        %d : day
+        %h : hour
+        %m : min
+        %s : second
+     }
+    if not set data format, then default is : %y/%m/%d %h:%M:%s
+ %s : setion
+ %L : level
+ %m : msg
+ %f : file
+ %F : function
+ %l : line
+ 
+ for example:
+ "%d{%y/%m/%d %h:%m:%s} %s | %L | %m | %f(%l)" will output:
+ 2015/1/18 19:50:25 XEngine | DEBUG | ...... | XLogger.cpp(50)
+ */
+class X_API XLogFormater
+{
+public:
+    class XPattern
+    : public XRefObject
+    {
+    public:
+        virtual ~XPattern() {}
+        virtual XVoid format( XString& strOut, const XLogElement& kLog ) = 0;
+    };
+    typedef XSmartPointer< XPattern > XPatternPtr;
+    
+    XVoid               setPattern( const XString& strPattern );
+    XString             format( const XLogElement& kLog );
+    XVoid               format( XString& strOut, const XLogElement& kLog );
+    
+protected:
+    std::vector< XPatternPtr > m_vecPatterns;
+};
+
+
+// used for write log like X_LOG_INFO( msg << ... << ... )
 class X_API XLogStreamHelper
 {
 public:
@@ -114,17 +149,16 @@ public:
     std::ostringstream m_kStream;
 };
 
+
 #define X_LOGGING( section, level, text )	\
-XLogger::getIns().log( section, level, ( XLogStreamHelper() << text ).m_kStream.str(), __FILE__, __FUNCTION__, __LINE__ )
+XLogger::getIns().log( section, level, ( XLogStreamHelper() << text ).m_kStream.str(), XString(__FILE__), XString(__FUNCTION__), __LINE__ )
 
 #define X_ENGINE_LOG_SECTION	"XEngine"
 
-//! stream base log version. use as : msg << a << b.
 #define	X_LOG_DEBUG( log )			X_LOGGING( X_ENGINE_LOG_SECTION, LL_DEBUG, log )
 #define	X_LOG_INFO( log )			X_LOGGING( X_ENGINE_LOG_SECTION, LL_INFO, log )
 #define	X_LOG_WARNING( log )		X_LOGGING( X_ENGINE_LOG_SECTION, LL_WARNING, log )
 #define	X_LOG_ERROR( log )			X_LOGGING( X_ENGINE_LOG_SECTION, LL_ERROR, log )
-
 
 X_NS_END
 
