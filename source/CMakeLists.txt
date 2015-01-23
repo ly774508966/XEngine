@@ -14,6 +14,14 @@ include( Reflection/CMakeLists.txt )
 include( IO/CMakeLists.txt )
 include( Math/CMakeLists.txt )
 
+
+if (APPLE)
+	message("Setting up Xcode for C++11 with libc++.")
+	set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++0x")
+	SET(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++")
+endif()
+
+
 ADD_LIBRARY( XEngine
 		SHARED
 		${ALL_FILES}
