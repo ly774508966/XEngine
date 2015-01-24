@@ -51,7 +51,10 @@ XRet XFileInputDataStream::open( const XString& strName )
     
     FILE* pkFile = nullptr;
 #if X_OS_WIN
-    _wfopen_s( &pkFile, XStringUtil::UTF8ToWide( strName ).c_str(), L"rb" );
+	if (_wfopen_s(&pkFile, XStringUtil::UTF8ToWide(strName).c_str(), L"rb"))
+	{
+		return X_ERROR;
+	}
 #else
     pkFile = fopen( strName.c_str(), "rb" );
 #endif

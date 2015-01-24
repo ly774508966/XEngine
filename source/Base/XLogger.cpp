@@ -58,7 +58,12 @@ public:
     {
         time_t  et;
         time( &et );
+#if X_OS_WIN
+		tm etm;
+		localtime_s(&etm, &et);
+#else
         tm etm = *localtime( &et );
+#endif
         
         return format( strOut, kLog, etm );
     }
@@ -78,7 +83,12 @@ public:
     {
         time_t  et;
         time( &et );
-        tm etm = *localtime( &et );
+#if X_OS_WIN
+		tm etm;
+		localtime_s(&etm, &et);
+#else
+		tm etm = *localtime(&et);
+#endif
         
         return format( strOut, kLog, etm );
     }
@@ -99,7 +109,12 @@ public:
     {
         time_t  et;
         time( &et );
-        tm etm = *localtime( &et );
+#if X_OS_WIN
+		tm etm;
+		localtime_s(&etm, &et);
+#else
+		tm etm = *localtime(&et);
+#endif
         
         return format( strOut, kLog, etm );
     }
@@ -120,7 +135,12 @@ public:
     {
         time_t  et;
         time( &et );
-        tm etm = *localtime( &et );
+#if X_OS_WIN
+		tm etm;
+		localtime_s(&etm, &et);
+#else
+		tm etm = *localtime(&et);
+#endif
         
         return format( strOut, kLog, etm );
     }
@@ -141,7 +161,12 @@ public:
     {
         time_t  et;
         time( &et );
-        tm etm = *localtime( &et );
+#if X_OS_WIN
+		tm etm;
+		localtime_s(&etm, &et);
+#else
+		tm etm = *localtime(&et);
+#endif
         
         return format( strOut, kLog, etm );
     }
@@ -162,7 +187,12 @@ public:
     {
         time_t  et;
         time( &et );
-        tm etm = *localtime( &et );
+#if X_OS_WIN
+		tm etm;
+		localtime_s(&etm, &et);
+#else
+		tm etm = *localtime(&et);
+#endif
         
         return format( strOut, kLog, etm );
     }
@@ -227,7 +257,12 @@ public:
     {
         time_t  et;
         time( &et );
-        tm tm = *localtime( &et );
+#if X_OS_WIN
+		tm tm;
+		localtime_s(&tm, &et);
+#else
+		tm tm = *localtime(&et);
+#endif
 
         if ( !m_vecPatterns.empty() )
         {

@@ -56,7 +56,11 @@ XString XStringUtil::format( const XChar* format, ... )
 	XChar temp[1024];
 	va_list ap;
 	va_start( ap, format );
+#if X_OS_WIN
+	XInt32 nResult = vsnprintf_s( temp, 1024-sizeof(XChar), _TRUNCATE, format, ap );
+#else
 	XInt32 nResult = vsnprintf( temp, 1024-sizeof(XChar), format, ap );
+#endif
 	va_end( ap );
 	if ( nResult > -1
 		&& nResult < 1024 - sizeof(XChar) )
@@ -74,7 +78,11 @@ XString XStringUtil::format( const XChar* format, ... )
         
 		va_list ap;
 		va_start( ap, format );
+#if X_OS_WIN
+		nResult = vsnprintf_s(pkCodeBuffer, nBufferSize - sizeof(XChar), _TRUNCATE, format, ap);
+#else
 		nResult = vsnprintf( pkCodeBuffer, nBufferSize-sizeof(XChar), format, ap );
+#endif
 		va_end( ap );
         
 		if ( nResult > -1

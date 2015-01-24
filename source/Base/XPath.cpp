@@ -79,9 +79,9 @@ XVoid XPath::format()
     {
 #if X_OS_WIN
         // lower dirve name.
-        if ( isalpha( strTemp[0] ) && strTemp[1] == ':' ) 
+		if (isalpha(m_strPath[0]) && m_strPath[1] == ':')
         {
-            strTemp[0] = tolower( strTemp[0] );
+			m_strPath[0] = tolower(m_strPath[0]);
         }
 #endif
     }

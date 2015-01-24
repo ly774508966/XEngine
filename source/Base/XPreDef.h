@@ -37,12 +37,14 @@
 #include <cstdint>
 #include <string>
 #include <assert.h>
+#include <stdarg.h>
 
 #include <list>
 #include <vector>
 #include <set>
 #include <map>
 #include <sstream>
+#include <algorithm>
 
 #include "XConfig.h"
 #include "XVersion.h"
