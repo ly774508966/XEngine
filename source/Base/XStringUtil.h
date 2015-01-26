@@ -62,7 +62,7 @@ public:
 X_FORCEINLINE XString XStringUtil::toUpper( const XString& str )
 {
     XString strResult = str;
-    std::transform( str.begin(), str.end(), strResult.begin(), toupper );
+    std::transform( str.begin(), str.end(), strResult.begin(), ::toupper );
     return strResult;
 }
 
@@ -70,7 +70,7 @@ X_FORCEINLINE XString XStringUtil::toUpper( const XString& str )
 X_FORCEINLINE XString XStringUtil::toLower( const XString& str )
 {
     XString strResult = str;
-    std::transform( str.begin(), str.end(), strResult.begin(), tolower );
+    std::transform( str.begin(), str.end(), strResult.begin(), ::tolower );
     return strResult;
 }
 

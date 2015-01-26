@@ -38,6 +38,7 @@
 #include <string>
 #include <assert.h>
 #include <stdarg.h>
+#include <ctype.h>
 
 #include <list>
 #include <vector>

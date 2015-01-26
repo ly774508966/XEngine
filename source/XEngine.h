@@ -38,6 +38,7 @@
 #include "Base/XUtils.h"
 
 #include "Reflection/XMetaSystem.h"
+#include "Reflection/XMetaEnum.h"
 #include "Reflection/XMetaClass.h"
 #include "Reflection/XMetaField.h"
 #include "Reflection/XMetaTranslator.h"

@@ -34,15 +34,18 @@
 X_NS_BEGIN
 
 class XMetaClass;
+class XMetaEnum;
 class X_API XMetaSystem
 {
 public:
 	// < crc32 -- XMetaClass >
-    typedef std::map< XUInt32, const XMetaClass* >    TMapMetaClasses;
+    typedef std::map< XUInt32, const XMetaClass* >      TMapMetaClasses;
+    typedef std::map< XUInt32, const XMetaEnum* >       TMapMetaEnums;
     
 private:
     
     TMapMetaClasses             m_mapAllMetaClasses;
+    TMapMetaEnums               m_mapAllMetaEnums;
 public:
     
     static XMetaSystem&         getIns() { static XMetaSystem s_kIns; return s_kIns; }
@@ -51,6 +54,12 @@ public:
 	const XMetaClass*           getMetaClass( const XString& strName ) const;
 	const XMetaClass*           getMetaClass( XUInt32 crc32 ) const;
     const TMapMetaClasses&      getAllMetaClasses() const { return m_mapAllMetaClasses; }
+    
+    
+    XRet                        registerMetaEnum( const XMetaEnum* pkMetaEnum );
+    const XMetaEnum*            getMetaEnum( const XString& strName ) const;
+    const XMetaEnum*            getMetaEnum( XUInt32 crc32 ) const;
+    const TMapMetaEnums&        getAllMetaEnums() const { return m_mapAllMetaEnums; }
 };
 
 X_NS_END

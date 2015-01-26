@@ -27,14 +27,66 @@
  ******************************************************************************/
 
 #include "XMetaEnum.h"
-
+#include "Base/XStringUtil.h"
 
 X_NS_BEGIN
 
-XMetaEnum::XMetaEnum( const XString& strName )
+//------------------------------------------------------------------------------
+XMetaEnum::XMetaEnum( const XString& strName, TFunMetaEnumInit f )
 : XMetaObject( strName )
+, m_uiCrc32( XStringUtil::crc32( strName ) )
+, m_pkFunInit( f )
 {
     
+}
+
+//------------------------------------------------------------------------------
+XRet XMetaEnum::addElement( const XString& strName, XUInt32 value )
+{
+    for ( auto& i : m_vecElements )
+    {
+        if ( i.strName == strName
+            || i.uiValue == value )
+        {
+            return X_ERROR;
+        }
+    }
+    
+    m_vecElements.push_back( XMetaEnumElement( strName, value ) );
+    
+    return X_SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+XRet XMetaEnum::getValueByName( const XString& strName, XUInt32& value ) const
+{
+    const_cast<XMetaEnum*>(this)->lazyInit();
+    
+    for ( auto& i : m_vecElements )
+    {
+        if ( i.strName == strName )
+        {
+            value = i.uiValue;
+            return X_SUCCESS;
+        }
+    }
+    return X_ERROR;
+}
+
+//------------------------------------------------------------------------------
+XRet XMetaEnum::getNameByValue( XUInt32 value, XString& strName ) const
+{
+    const_cast<XMetaEnum*>(this)->lazyInit();
+    
+    for ( auto& i : m_vecElements )
+    {
+        if ( i.uiValue == value )
+        {
+            strName = i.strName;
+            return X_SUCCESS;
+        }
+    }
+    return X_ERROR;
 }
 
 X_NS_END

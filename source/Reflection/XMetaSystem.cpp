@@ -28,6 +28,7 @@
 
 #include "XMetaSystem.h"
 #include "XMetaClass.h"
+#include "XMetaEnum.h"
 #include "Base/XLogger.h"
 
 X_NS_BEGIN
@@ -63,5 +64,38 @@ const XMetaClass* XMetaSystem::getMetaClass( XUInt32 crc32 ) const
 
 	return nullptr;
 }
+
+//------------------------------------------------------------------------------
+XRet XMetaSystem::registerMetaEnum( const XMetaEnum* pkMetaEnum )
+{
+    assert( pkMetaEnum );
+    auto iter = m_mapAllMetaEnums.find( pkMetaEnum->getCrc32() );
+    if ( iter != m_mapAllMetaEnums.end() )
+    {
+        X_LOG_ERROR( "failed to register meta enum[ " << pkMetaEnum->getName() << " ]. "
+                    "crc32[ " << iter->second->getCrc32() << " ] of meta enum[ " << iter->second->getName() << " ] already exist!" );
+        return X_ERROR;
+    }
+    return m_mapAllMetaEnums.insert( std::make_pair( pkMetaEnum->getCrc32(), pkMetaEnum ) ).second ? X_SUCCESS : X_ERROR;
+}
+
+//------------------------------------------------------------------------------
+X_FORCEINLINE const XMetaEnum* XMetaSystem::getMetaEnum( const XString& strName ) const
+{
+    return getMetaEnum( XStringUtil::crc32( strName ) );
+}
+
+//------------------------------------------------------------------------------
+const XMetaEnum* XMetaSystem::getMetaEnum( XUInt32 crc32 ) const
+{
+    auto iter = m_mapAllMetaEnums.find( crc32 );
+    if( iter != m_mapAllMetaEnums.end() )
+    {
+        return iter->second;
+    }
+    
+    return nullptr;
+}
+
 
 X_NS_END

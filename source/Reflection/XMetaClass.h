@@ -32,6 +32,7 @@
 #include "XMetaObject.h"
 #include "XMetaField.h"
 #include "XMetaMethod.h"
+#include "XMetaSystem.h"
 
 X_NS_BEGIN
 
