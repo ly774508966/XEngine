@@ -26,18 +26,31 @@
  **
  ******************************************************************************/
 
-#include "XMetaMethod.h"
+#ifndef __XMETASYSTEM_H__
+#define __XMETASYSTEM_H__
 
+#include "Base/XPreDef.h"
 
 X_NS_BEGIN
 
-/*
-XMetaMethod::XMetaMethod( const XMetaClass* pkParent, const XString& strName )
-: XMetaObject( strName )
-, m_pkParent( pkParent )
+class XMetaClass;
+class X_API XMetaSystem
 {
+public:
+    typedef std::map< XString, const XMetaClass* >    TMapMetaClasses;
     
-}
-*/
+private:
+    
+    TMapMetaClasses             m_mapAllMetaClasses;
+public:
+    
+    static XMetaSystem&         getIns() { static XMetaSystem s_kIns; return s_kIns; }
+    
+    XRet                        registerMetaClass( const XMetaClass* pkMetaClass );
+    const XMetaClass*           getMetaClass( const XString& strName ) const;
+    const TMapMetaClasses&      getAllMetaClasses() const { return m_mapAllMetaClasses; }
+};
 
 X_NS_END
+
+#endif // __XMETASYSTEM_H__

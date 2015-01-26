@@ -39,7 +39,6 @@ class X_API XSequenceTranslator_Vector
 {
     typedef typename T::value_type  value_type;
 public:
-    virtual const XMetaType&        getMetaType() const { return XMetaTypeHelper<T>::getMetaType(); }
     
     virtual XBool                   equals( const XMetaFieldPointer& kSrc, const XMetaFieldPointer& kDest ) const
     {
@@ -49,27 +48,6 @@ public:
     virtual XVoid                   copy( XMetaFieldPointer& kDest, const XMetaFieldPointer& kSrc, XUInt32 uiFlag ) const
     {
         
-    }
-    
-    virtual XRet                    write( const XMetaFieldPointer& kPointer, XSerializer* pkSerializer ) const
-    {
-        if ( getLength( kPointer ) == 0 )
-        {
-            return 1;
-        }
-        
-        const T& kVector = kPointer.as<T>();
-        
-        *pkSerializer << kPointer.getField()->getName().c_str();
-        pkSerializer->end();
-        
-        for ( XUInt32 i = 0; i < kVector.size(); ++i )
-        {
-            getItemTranslator()->write( XMetaFieldPointer( (XVoid*)&kVector[i], kPointer.getField(), kPointer.getObject() ), pkSerializer );
-        }
-        pkSerializer->end();
-        
-        return 1;
     }
     
     virtual XUInt32                 getLength( const XMetaFieldPointer& kPointer ) const

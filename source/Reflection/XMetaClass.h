@@ -46,7 +46,6 @@ class X_API XMetaClass
     : public XMetaObject
 {
 protected:
-    
     XUInt32                     m_uiSize;
     
     TFunMetaClassInit           m_pkFunInitFields;
@@ -62,8 +61,11 @@ protected:
     XBool                       m_bFieldsInited;
     XBool                       m_bMethodsInited;
     
+private:
+    static std::map< std::string, const XMetaClass* >  ms_mapMetaClasses;
+    
 public:
-    XMetaClass( const XString& strName, XUInt32 size, TFunMetaClassInit fun_fields, TFunMetaClassInit fun_methods );
+    XMetaClass( const XString& strName, XUInt32 size, TFunMetaClassInit fun_parents, TFunMetaClassInit fun_fields, TFunMetaClassInit fun_methods );
     
     XUInt32                     getSize() const { return m_uiSize; }
     
@@ -94,7 +96,7 @@ protected:
 template < typename T >
 XBool XMetaClass::isKindOf() const
 {
-    return isKindOf( XMetaClassHelper<T>::ms_kMetaClass.getName() );
+    return isKindOf( T::ms_kMetaClass.getName() );
 }
 
 X_FORCEINLINE XBool XMetaClass::isKindOf( const XMetaClass* pkMetaClass ) const
@@ -123,11 +125,13 @@ const XMetaField* XMetaClass::registerField( const XString& strName, TF* f, unsi
 template< typename TFun >
 const XMetaMethod* XMetaClass::registerMethod( const XString& strName, TFun f ) const
 {
-    
+    /*
     const XMetaMethod* pkMethod = new XMetaMethod_T< TFun >( this, strName, f );
     assert( pkMethod != nullptr );
     m_mapMethods[strName].push_back( pkMethod );
     return pkMethod;
+     */
+    return nullptr;
 }
 
 
@@ -158,34 +162,22 @@ X_FORCEINLINE XVoid XMetaClass::lazyInitMethods()
 
 #define X_DECLARE_META_CLASS( class_name )    \
 public: \
-    static const XMetaClass*        ms_pkMetaClass; \
-    virtual const XMetaClass*       getMetaClass() const { return ms_pkMetaClass; } \
+    virtual const XMetaClass* getMetaClass() const { return &ms_kMetaClass; } \
+    static const XMetaClass ms_kMetaClass;    \
+    static XRet ms_registerRet;   \
     static XVoid buildMetaParents( XMetaClass& kMetaClass );    \
     static XVoid buildMetaFields( XMetaClass& kMetaClass ); \
     static XVoid buildMetaMethods( XMetaClass& kMetaClass );    \
 
 
 #define X_IMPLEMENT_META_CLASS( class_name, b, f, m ) \
-    const XMetaClass* class_name::ms_pkMetaClass = &XMetaClassHelper<class_name>::getMetaClass();   \
+    const XMetaClass class_name::ms_kMetaClass( #class_name, sizeof( class_name ), &class_name::buildMetaParents, &class_name::buildMetaFields, &class_name::buildMetaMethods );   \
+    XRet class_name::ms_registerRet = XMetaSystem::getIns().registerMetaClass( &class_name::ms_kMetaClass );  \
     XVoid class_name::buildMetaParents( XMetaClass& kMetaClass ) { b }  \
     XVoid class_name::buildMetaFields( XMetaClass& kMetaClass ) { f }  \
     XVoid class_name::buildMetaMethods( XMetaClass& kMetaClass ) { m }
 
-
-
-#define X_DECLARE_META_CLASS_HELPER( class_name )   \
-template <> \
-class XMetaClassHelper< class_name >    \
-{   \
-public: \
-    static const XMetaClass&    getMetaClass() \
-    {   \
-        static const XMetaClass s_kMetaClass( #class_name, sizeof( class_name ), &class_name::buildMetaFields, &class_name::buildMetaMethods );   \
-        return s_kMetaClass;   \
-    }   \
-};
-
-#define X_META_BASE( base_name ) kMetaClass.addBaseClass( &XMetaClassHelper<base_name>::getMetaClass() );
+#define X_META_BASE( base_name ) kMetaClass.addBaseClass( &base_name::ms_kMetaClass );
 #define X_META_FIELD( n, f, flag )  kMetaClass.registerField( n, f, flag );
 #define X_META_METHOD( n, m ) kMetaClass.registerMethod( n, m );
 

@@ -29,26 +29,8 @@
 
 #include "XStringUtil.h"
 
+
 X_NS_BEGIN
-
-const XString XStringUtil::EMPTY_STRING;
-const XWString XStringUtil::EMPTY_WSTRING;
-
-//------------------------------------------------------------------------------
-XString XStringUtil::toUpper( const XString& str )
-{
-	XString strResult = str;
-	std::transform( str.begin(), str.end(), strResult.begin(), toupper );
-	return strResult;
-}
-
-//------------------------------------------------------------------------------
-XString XStringUtil::toLower( const XString& str )
-{
-	XString strResult = str;
-	std::transform( str.begin(), str.end(), strResult.begin(), tolower );
-	return strResult;
-}
 
 //------------------------------------------------------------------------------
 XString XStringUtil::format( const XChar* format, ... )
@@ -136,16 +118,16 @@ XVoid XStringUtil::splitString( XArrString& strArray, const XString& str, const 
 }
 
 // ------------------------------------------------------------------------
-XString XStringUtil::toString( const XArrString& arr )
+XString XStringUtil::toString( const XArrString& arr, const XString& strMid /*= ""*/ )
 {
-	X_RET_VAL_IF( arr.empty(), EMPTY_STRING );
+	X_RET_VAL_IF( arr.empty(), "" );
     
 	std::stringstream stream;
 	for ( XUInt32 i = 0; i < arr.size(); ++i )
 	{
 		if ( i != 0 )
 		{
-			stream << "";
+			stream << strMid;
 		}
         
 		stream << arr[i];

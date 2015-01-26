@@ -38,48 +38,16 @@ class XClassTranslator_T
 : public XClassTranslator
 {
 public:
+    virtual const XMetaClass*           getMetaClass() const { return &T::ms_kMetaClass; }
     
-    virtual const XMetaType&        getMetaType() const { return XMetaTypeHelper<T>::getMetaType(); }
-    
-    virtual XBool                   equals( const XMetaFieldPointer& kSrc, const XMetaFieldPointer& kDest ) const
+    virtual XBool                       equals( const XMetaFieldPointer& kSrc, const XMetaFieldPointer& kDest ) const
     {
         return false;
     }
     
-    virtual XVoid                   copy( XMetaFieldPointer& kDest, const XMetaFieldPointer& kSrc, XUInt32 uiFlag ) const
+    virtual XVoid                       copy( XMetaFieldPointer& kDest, const XMetaFieldPointer& kSrc, XUInt32 uiFlag ) const
     {
         
-    }
-    
-    virtual XRet                    write( const XMetaFieldPointer& kPointer, XSerializer* pkSerializer ) const
-    {
-        assert( pkSerializer != nullptr );
-        const XMetaClass* pkMetaClass = getMetaType().getMetaClass();
-        assert( pkMetaClass != nullptr );
-        
-        if ( kPointer.getField() != nullptr )
-        {
-            (*pkSerializer) << kPointer.getField()->getName().c_str();
-        }
-        else
-        {
-            (*pkSerializer) << pkMetaClass->getName().c_str();
-        }
-        pkSerializer->end();
-        
-        const TMapMetaFields& mapFields = pkMetaClass->getAllFields();
-        for ( auto iter = mapFields.begin(); iter != mapFields.end(); ++iter )
-        {
-            const XMetaField* pkField = iter->second;
-            const XMetaTranslator* pkTranslator = pkField->getTranslator();
-            assert( pkTranslator != nullptr );
-            
-            XMetaFieldPointer kP( (XVoid*)kPointer.getObject(), kPointer.getAddress(), pkField );
-            pkTranslator->write( kP, pkSerializer );
-        }
-        
-        pkSerializer->end();
-        return 1;
     }
 };
 
@@ -89,6 +57,7 @@ class XTranslatorHelper
 public:
     static const XMetaTranslator*    getTranslator()
     {
+        assert( std::is_class<T>::value );
         static XClassTranslator_T<T> s_kIns;
         return &s_kIns;
     }

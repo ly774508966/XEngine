@@ -37,14 +37,13 @@
 #include "Base/XSmartPointer.h"
 #include "Base/XUtils.h"
 
+#include "Reflection/XMetaSystem.h"
 #include "Reflection/XMetaClass.h"
 #include "Reflection/XMetaField.h"
 #include "Reflection/XMetaTranslator.h"
 #include "Reflection/XMetaScalarTranslator.h"
 #include "Reflection/XMetaClasstranslator.h"
 #include "Reflection/XMetaSTLTranslator.h"
-#include "Reflection/XMetaType.h"
-
 
 #include "IO/XDataStream.h"
 

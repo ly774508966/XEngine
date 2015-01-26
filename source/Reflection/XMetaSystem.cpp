@@ -26,18 +26,26 @@
  **
  ******************************************************************************/
 
-#include "XMetaMethod.h"
-
+#include "XMetaSystem.h"
+#include "XMetaClass.h"
 
 X_NS_BEGIN
 
-/*
-XMetaMethod::XMetaMethod( const XMetaClass* pkParent, const XString& strName )
-: XMetaObject( strName )
-, m_pkParent( pkParent )
+XRet XMetaSystem::registerMetaClass( const XMetaClass* pkMetaClass )
 {
-    
+    assert( pkMetaClass );
+    return m_mapAllMetaClasses.insert( std::make_pair( pkMetaClass->getName(), pkMetaClass ) ).second ? X_SUCCESS : X_ERROR;
 }
-*/
+
+const XMetaClass* XMetaSystem::getMetaClass( const XString& strName ) const
+{
+    auto iter = m_mapAllMetaClasses.find( strName );
+    if ( iter != m_mapAllMetaClasses.end() )
+    {
+        return iter->second;
+    }
+    
+    return nullptr;
+}
 
 X_NS_END

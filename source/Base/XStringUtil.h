@@ -36,10 +36,6 @@ X_NS_BEGIN
 class X_API XStringUtil
 {
 public:
-    
-	static const XString			EMPTY_STRING;
-	static const XWString			EMPTY_WSTRING;
-    
 	static XString					toUpper( const XString& str );
 	static XString					toLower( const XString& str );
     
@@ -47,9 +43,57 @@ public:
     
 	static XVoid					trim( XString& str, XBool left = true, XBool right = true );
 	static XVoid 					splitString( XArrString& strArray, const XString& str, const XString& strSplit );
-	static XString                  toString( const XArrString& arr );
+	static XString                  toString( const XArrString& arr, const XString& strMid = ";" );
+    
+    static XWString                 utf8ToWide( const XChar* pUTF8, XSize len );
+    static XWString                 utf8ToWide( const XString& strUTF8 );
+    
+    static XString                  wideToUTF8( const XWChar* pWide, XSize len );
+    static XString                  wideToUTF8( const XWString& strWide );
 };
 
+
+//------------------------------------------------------------------------------
+X_FORCEINLINE XString XStringUtil::toUpper( const XString& str )
+{
+    XString strResult = str;
+    std::transform( str.begin(), str.end(), strResult.begin(), toupper );
+    return strResult;
+}
+
+//------------------------------------------------------------------------------
+X_FORCEINLINE XString XStringUtil::toLower( const XString& str )
+{
+    XString strResult = str;
+    std::transform( str.begin(), str.end(), strResult.begin(), tolower );
+    return strResult;
+}
+
+// ------------------------------------------------------------------------
+X_FORCEINLINE XWString XStringUtil::utf8ToWide( const XString& strUTF8 )
+{
+    return utf8ToWide( strUTF8.c_str(), strUTF8.size() );
+}
+
+// ------------------------------------------------------------------------
+X_FORCEINLINE XWString XStringUtil::utf8ToWide( const XChar* pUTF8, XSize len )
+{
+    std::wstring_convert< std::codecvt_utf8_utf16< XWChar > > cvt;
+    return cvt.from_bytes( pUTF8, pUTF8 + ( len ? len : strlen(pUTF8) ) );
+}
+
+// ------------------------------------------------------------------------
+X_FORCEINLINE XString XStringUtil::wideToUTF8( const XWString& strWide )
+{
+    return wideToUTF8( strWide.c_str(), strWide.size() );
+}
+
+// ------------------------------------------------------------------------
+X_FORCEINLINE XString XStringUtil::wideToUTF8( const XWChar* pWide, XSize len )
+{
+    std::wstring_convert< std::codecvt_utf8_utf16< XWChar > > cvt;
+    return cvt.to_bytes( pWide, pWide + ( len ? len : wcslen(pWide) ) );
+}
 
 X_NS_END
 

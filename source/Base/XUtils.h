@@ -40,18 +40,51 @@
 #define X_MACRO_DO_JOIN( X,Y )  X_MACRO_DO_JOIN2(X,Y)
 #define X_MACRO_JOIN( X,Y )     X_MACRO_DO_JOIN(X,Y)
 
-#define X_BIT( b )	1 << (b)
-#define X_SAFE_DEL( ptr ) if ( ptr ) { delete (ptr); (ptr) = 0; }
-#define X_SAFE_DEL_ARR( ptr ) if ( ptr ) { delete [] (ptr); (ptr) = 0; }
-#define X_RET_IF( exp ) if ( exp ) return
-#define X_RET_VAL_IF( exp, val ) if ( exp ) return val;
 
+
+// macro to str.
+#define X_MACRO_STR2( x )	#x
+#define X_MACRO_STR( x )	X_MACRO_STR2( x )
+
+
+#define X_BIT( b )	1 << (b)
+
+
+#define X_RET_IF( exp ) if ( exp ) return
+#define X_RET_VAL_IF( exp, val ) if ( exp ) return val
+
+
+// ---------------------------------------------------------------------------
 #define X_NEW new
-//------------------------------------------------------------------------------
+#define X_SAFE_DEL( ptr )       if ( ptr ) { delete (ptr); (ptr) = 0; }
+#define X_SAFE_DEL_ARR( ptr )   if ( ptr ) { delete [] (ptr); (ptr) = 0; }
+
+
+
+// ---------------------------------------------------------------------------
+// macro to define a class without copy ctor nor assignment operator.
+#define X_NO_COPY_CLASS( classname )        \
+    private:                                \
+    classname(const classname&);            \
+    classname& operator=(const classname&);
+
+
 
 
 
 X_NS_BEGIN
+
+
+
+// ---------------------------------------------------------------------------
+// fourCC
+template < XUInt8 a, XUInt8 b, XUInt8 c, XUInt8 d >
+struct XFourCC
+{
+    static const XUInt8 value = ( d << 24 ) | ( c << 16 ) | ( b << 8 ) | a;
+};
+
+
 
 typedef XInt32  XRet;
 #define X_SUCCESS    0
@@ -75,60 +108,6 @@ struct TArrayHelper< T[N] >
     static XUInt32 getArrayCount() { return N; }
 };
 
-
-//------------------------------------------------------------------------------
-// stl helper.
-#define X_DECLITER( container )	\
-typedef container::iterator				container##Iter;	\
-typedef container::const_iterator		container##ConstIter;	\
-
-#define X_DECLMAP( key, element, type_def )	\
-typedef std::map< key, element >			type_def;	\
-X_DECLITER( type_def )
-
-#define X_DECLMAPEX( key, element, sorter, type_def )	\
-typedef std::map< key, element, sorter >	type_def;	\
-X_DECLITER( type_def )
-
-#define X_DECLMULTIMAP( key, element, type_def )	\
-typedef std::multimap< key, element >		type_def;	\
-X_DECLITER( type_def )
-
-#define X_DECLVEC( element, type_def )	\
-typedef std::vector< element >			type_def;	\
-X_DECLITER( type_def )
-
-#define X_DECLLIST( element, type_def )	\
-typedef std::list< element >				type_def;	\
-X_DECLITER( type_def )
-
-#define X_DECLSET( element, type_def )	\
-typedef std::set< element >				type_def;	\
-X_DECLITER( type_def )for ( ; curIter != endIter; ++curIter ) { op; }	\
-}
-
-template < class TC, class TV >
-X_FORCEINLINE XRet x_try_add_unique( TC& c, const TV& v )
-{
-    if ( std::find( c.begin(), c.end(), v ) == c.end() )
-    {
-        c.push_back( v );
-        return X_SUCCESS;
-    }
-    return X_ERROR;
-}
-template < class TC,class TV >
-X_FORCEINLINE XRet x_try_erase( TC& c, const TV& v )
-{
-    typename TC::iterator iter = std::find( c.begin(), c.end(), v );
-    if ( iter != c.end() )
-    {
-        c.erase( iter );
-        return X_SUCCESS;
-    }
-    return X_ERROR;
-}
-//------------------------------------------------------------------------------
 
 X_NS_END
 

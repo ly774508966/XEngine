@@ -32,7 +32,9 @@
 
 X_NS_BEGIN
 
-XMetaClass::XMetaClass( const XString& strName, XUInt32 size, TFunMetaClassInit fun_fields, TFunMetaClassInit fun_methods )
+std::map< std::string, const XMetaClass* > XMetaClass::ms_mapMetaClasses;
+
+XMetaClass::XMetaClass( const XString& strName, XUInt32 size, TFunMetaClassInit fun_parents, TFunMetaClassInit fun_fields, TFunMetaClassInit fun_methods )
 : XMetaObject( strName )
 , m_uiSize( size )
 , m_pkFunInitFields( fun_fields )

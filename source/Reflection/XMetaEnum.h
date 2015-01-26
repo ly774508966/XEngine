@@ -48,8 +48,6 @@ public:
     unsigned int                getValueByName( const XString& strName ) const;
     const XString&              getNameByValue( unsigned int value ) const;
     const TMapMetaEnumElements& getAllElements() const { return m_mapElements; }
-    
-    //virtual bool                accept( MetaVisitor* pkVisitor );
 };
 
 X_NS_END

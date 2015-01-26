@@ -106,7 +106,7 @@ typedef XSmartPointer<classname> classname##Ptr
 
 //---------------------------------------------------------------------------
 template < typename T >
-inline XSmartPointer<T >::XSmartPointer(T* pObject)
+X_FORCEINLINE XSmartPointer<T >::XSmartPointer(T* pObject)
 {
     m_pObject = pObject;
     if (m_pObject)
@@ -114,7 +114,7 @@ inline XSmartPointer<T >::XSmartPointer(T* pObject)
 }
 //---------------------------------------------------------------------------
 template < typename T >
-inline XSmartPointer<T>::XSmartPointer(const XSmartPointer& ptr)
+X_FORCEINLINE XSmartPointer<T>::XSmartPointer(const XSmartPointer& ptr)
 {
     m_pObject = ptr.m_pObject;
     if (m_pObject)
@@ -122,32 +122,32 @@ inline XSmartPointer<T>::XSmartPointer(const XSmartPointer& ptr)
 }
 //---------------------------------------------------------------------------
 template < typename T >
-inline XSmartPointer<T>::~XSmartPointer()
+X_FORCEINLINE XSmartPointer<T>::~XSmartPointer()
 {
     if (m_pObject)
         m_pObject->release();
 }
 //---------------------------------------------------------------------------
 template < typename T >
-inline XSmartPointer<T>::operator T*() const
+X_FORCEINLINE XSmartPointer<T>::operator T*() const
 {
     return m_pObject;
 }
 //---------------------------------------------------------------------------
 template < typename T >
-inline T& XSmartPointer<T>::operator*() const
+X_FORCEINLINE T& XSmartPointer<T>::operator*() const
 {
     return *m_pObject;
 }
 //---------------------------------------------------------------------------
 template < typename T >
-inline T* XSmartPointer<T>::operator->() const
+X_FORCEINLINE T* XSmartPointer<T>::operator->() const
 {
     return m_pObject;
 }
 //---------------------------------------------------------------------------
 template < typename T >
-inline XSmartPointer<T>& XSmartPointer<T>::operator=(const XSmartPointer& ptr)
+X_FORCEINLINE XSmartPointer<T>& XSmartPointer<T>::operator=(const XSmartPointer& ptr)
 {
     if (m_pObject != ptr.m_pObject)
     {
@@ -161,7 +161,7 @@ inline XSmartPointer<T>& XSmartPointer<T>::operator=(const XSmartPointer& ptr)
 }
 //---------------------------------------------------------------------------
 template < typename T >
-inline XSmartPointer<T>& XSmartPointer<T>::operator=(T* pObject)
+X_FORCEINLINE XSmartPointer<T>& XSmartPointer<T>::operator=(T* pObject)
 {
     if (m_pObject != pObject)
     {
@@ -175,25 +175,25 @@ inline XSmartPointer<T>& XSmartPointer<T>::operator=(T* pObject)
 }
 //---------------------------------------------------------------------------
 template < typename T >
-inline bool XSmartPointer<T>::operator==(T* pObject) const
+X_FORCEINLINE bool XSmartPointer<T>::operator==(T* pObject) const
 {
     return (m_pObject == pObject);
 }
 //---------------------------------------------------------------------------
 template < typename T >
-inline bool XSmartPointer<T>::operator!=(T* pObject) const
+X_FORCEINLINE bool XSmartPointer<T>::operator!=(T* pObject) const
 {
     return (m_pObject != pObject);
 }
 //---------------------------------------------------------------------------
 template < typename T >
-inline bool XSmartPointer<T>::operator==(const XSmartPointer& ptr) const
+X_FORCEINLINE bool XSmartPointer<T>::operator==(const XSmartPointer& ptr) const
 {
     return (m_pObject == ptr.m_pObject);
 }
 //---------------------------------------------------------------------------
 template < typename T >
-inline bool XSmartPointer<T>::operator!=(const XSmartPointer& ptr) const
+X_FORCEINLINE bool XSmartPointer<T>::operator!=(const XSmartPointer& ptr) const
 {
     return (m_pObject != ptr.m_pObject);
 }

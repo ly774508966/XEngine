@@ -8,12 +8,12 @@ set ( REFLECTION_FILES
 	Reflection/XMetaField.cpp
 	Reflection/XMetaMethod.h
 	Reflection/XMetaMethod.cpp
-	Reflection/XMetaType.h
-	Reflection/XMetaVariant.h
 	Reflection/XMetaTranslator.h
 	Reflection/XMetaScalarTranslator.h
 	Reflection/XMetaClassTranslator.h
 	Reflection/XMetaSTLTranslator.h
+	Reflection/XMetaSystem.h
+	Reflection/XMetaSystem.cpp
 )
 
 list( APPEND ALL_FILES ${REFLECTION_FILES} )

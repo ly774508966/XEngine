@@ -30,5 +30,22 @@
 #define __XVERSION_H__
 
 
+//------------------------------------------------------------------------------
+// Major version number
+#define XENGINE_VERSION_MAJOR	0
+
+// Minor version number
+#define XENGINE_VERSION_MINOR	0
+
+// Revision version number
+#define XENGINE_VERSION_REVISION	1
+
+// version number
+#define XENGINE_VERSION    ( (XENGINE_VERSION_MAJOR << 16) | (XENGINE_VERSION_MINOR << 8) | XENGINE_VERSION_REVISION )
+
+#define XENGINE_NAME "XEngine"
+//------------------------------------------------------------------------------
+
+
 
 #endif // __XVERSION_H__

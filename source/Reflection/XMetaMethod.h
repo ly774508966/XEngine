@@ -31,11 +31,11 @@
 
 
 #include "XMetaObject.h"
-#include "XMetaVariant.h"
 
 X_NS_BEGIN
 
 
+/*
 typedef std::vector< const XMetaType* > TVecMetaTypes;
 class X_API XMetaMethod
 : public XMetaObject
@@ -142,6 +142,7 @@ public:
         kMetaMethod.m_vecParamTypes.push_back( &XMetaTypeHelper< P1 >::getMetaType() );
     }
 };
+ */
 
 X_NS_END
 

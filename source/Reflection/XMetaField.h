@@ -38,10 +38,11 @@ X_NS_BEGIN
 
 enum eMetaFieldFlag
 {
-    MFF_READ        = 1 << 0,
-    MFF_WRITE       = 1 << 1,
-    MFF_SERIALIZE   = 1 << 2,
-    MFF_SCRIPT      = 1 << 3,
+    MFF_READ        = X_BIT( 0 ),
+    MFF_WRITE       = X_BIT( 1 ),
+    MFF_SERIALIZE   = X_BIT( 2 ),
+    MFF_SCRIPT      = X_BIT( 3 ),
+    MFF_EDITOR      = X_BIT( 4 ),
     
     
     MFF_READ_WRITE = MFF_READ | MFF_WRITE,

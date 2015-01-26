@@ -45,6 +45,7 @@
 #include <map>
 #include <sstream>
 #include <algorithm>
+#include <codecvt>
 
 #include "XConfig.h"
 #include "XVersion.h"
@@ -73,7 +74,6 @@ template < typename T >
 class XMetaClass_T;
 class XMetaClass;
 typedef std::vector< const XMetaClass* > TVecMetaClasses;
-typedef std::map< XString, const XMetaClass* > TMapMetaClasses;
 
 class TMetaNamespace;
 typedef std::map< XString, TMetaNamespace* > TMapMetaNamespaces;

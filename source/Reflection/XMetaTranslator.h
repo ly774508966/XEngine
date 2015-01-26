@@ -29,14 +29,13 @@
 #ifndef __XMETATRANSLATOR_H__
 #define __XMETATRANSLATOR_H__
 
-#include <iostream>
-#include "Base/XSmartPointer.h"
-
 X_NS_BEGIN
+
 
 enum eMetaTranslatorType
 {
-    SCALOR = 0,
+    SCALAR = 0,
+    POINTER,
     CLASS,
     SEQUENTIAL_CONTAINER,
     ASSOCIATIVE_CONTAINER,
@@ -44,33 +43,7 @@ enum eMetaTranslatorType
 };
 
 class XMetaFieldPointer;
-class X_API XSerializer
-{
-public:
-    template < typename T >
-    XSerializer&   operator << ( const T& v )
-    {
-        std::cout << v;
-        return *this;
-    }
-    
-    template < typename T, XUInt32 N >
-    XSerializer&   operator << ( T arr[N] )
-    {
-        for ( XUInt32 i = 0; i < N; ++i )
-        {
-            std::cout << "idx : " << i << "v : " << arr[i];
-        }
-        return *this;
-    }
-    
-    XVoid   end()
-    {
-        std::cout << std::endl;
-    }
-};
-
-class XMetaType;
+class XMetaClass;
 class X_API XMetaTranslator
 {
     
@@ -78,28 +51,63 @@ protected:
 
 public:
     
-    virtual const XMetaType&            getMetaType() const = 0;
+    virtual eMetaTranslatorType         getTranslatorType() const = 0;
     
     virtual XBool                       equals( const XMetaFieldPointer& kSrc, const XMetaFieldPointer& kDest ) const = 0;
     virtual XVoid                       copy( XMetaFieldPointer& kDest, const XMetaFieldPointer& kSrc, XUInt32 uiFlag ) const = 0;
-    
-    virtual XRet                        write( const XMetaFieldPointer& kPointer, XSerializer* pkSerializer ) const = 0;
 };
 
 
 /*
-    arithmetic, pointer, enum.
+    arithmetic, enum.
  */
-class X_API XScalorTranslator
+enum eScalarType
+{
+    ST_BOOL,
+    
+    ST_FLOAT,
+    ST_DOUBLE,
+    
+    ST_LONG,
+    ST_ULONG,
+    
+    ST_I8,
+    ST_I16,
+    ST_I32,
+    ST_I64,
+    
+    ST_UI8,
+    ST_UI16,
+    ST_UI32,
+    ST_UI64,
+    
+    ST_STRING,
+    ST_WSTRING,
+};
+class X_API XScalarTranslator
 : public XMetaTranslator
 {
+public:
+    virtual eMetaTranslatorType         getTranslatorType() const { return SCALAR; }
+    
+    virtual eScalarType                 getScalarType() const = 0;
 };
 
 
+class X_API XPointerTranslator
+: public XMetaTranslator
+{
+public:
+    virtual eMetaTranslatorType         getTranslatorType() const { return POINTER; }
+    virtual const XMetaTranslator*      getTargetTranslator() const = 0;
+};
 
 class X_API XClassTranslator
 : public XMetaTranslator
 {
+public:
+    virtual eMetaTranslatorType         getTranslatorType() const { return CLASS; }
+    virtual const XMetaClass*           getMetaClass() const = 0;
 };
 
 
@@ -116,6 +124,9 @@ class X_API XSequenceTranslator
 : public XContainerTranslator
 {
 public:
+    
+    virtual eMetaTranslatorType         getTranslatorType() const { return SEQUENTIAL_CONTAINER; }
+    
     virtual const XMetaTranslator*      getItemTranslator() const = 0;
     
     virtual XVoid                       resize( XMetaFieldPointer& kPointer, XUInt32 uiLength ) = 0;
@@ -132,6 +143,8 @@ class X_API XAssociationTranslator
 : public XContainerTranslator
 {
 public:
+    
+    virtual eMetaTranslatorType         getTranslatorType() const { return ASSOCIATIVE_CONTAINER; }
     
     virtual const XMetaTranslator*      getKeyTranslator() const = 0;
     virtual const XMetaTranslator*      getValueTranslator() const = 0;

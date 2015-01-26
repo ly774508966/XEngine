@@ -31,99 +31,58 @@
 
 #include "XMetaTranslator.h"
 #include "XMetaField.h"
-#include "XMetaType.h"
 
 X_NS_BEGIN
 
 
-template < typename T >
-class XScalorTranslator_T
-: public XScalorTranslator
+template < typename T, eScalarType ST >
+class XScalarTranslator_T
+: public XScalarTranslator
 {
     
 public:
     
-    virtual const XMetaType&        getMetaType() const { return XMetaTypeHelper<T>::getMetaType(); }
+    virtual eScalarType                 getScalarType() const { return ST; }
     
-    virtual XBool                   equals( const XMetaFieldPointer& kSrc, const XMetaFieldPointer& kDest ) const
+    virtual XBool                       equals( const XMetaFieldPointer& kSrc, const XMetaFieldPointer& kDest ) const
     {
         const T& src = kSrc.as<T>();
         const T& dest = kDest.as<T>();
         return src == dest;
     }
     
-    virtual XVoid                   copy( XMetaFieldPointer& kDest, const XMetaFieldPointer& kSrc, XUInt32 uiFlag ) const
+    virtual XVoid                       copy( XMetaFieldPointer& kDest, const XMetaFieldPointer& kSrc, XUInt32 uiFlag ) const
     {
         const T& src = kSrc.as<T>();
         T& dest = kDest.as<T>();
         dest = src;
     }
-    
-    virtual XRet                    write( const XMetaFieldPointer& kPointer, XSerializer* pkSerializer ) const
-    {
-        const T& kV = kPointer.as<T>();
-        (*pkSerializer) << kPointer.getField()->getName().c_str() << ": " << kV << " address: " << kPointer.getAddress();
-        pkSerializer->end();
-        return 1;
-    }
 };
 
 
 template < typename T >
-class TClassPtrTranslator
-: public XScalorTranslator
+class TPointerTranslator
+: public XPointerTranslator
 {
-    typedef typename std::remove_pointer<T>::type   type;
 public:
-    virtual const XMetaType&        getMetaType() const { return XMetaTypeHelper<T>::getMetaType(); }
     
-    virtual XBool                   equals( const XMetaFieldPointer& kSrc, const XMetaFieldPointer& kDest ) const
+    virtual const XMetaTranslator*      getTargetTranslator() const
+    {
+        return XTranslatorHelper< typename std::remove_pointer<T>::type >::getTranslator();
+    }
+    
+    virtual XBool                       equals( const XMetaFieldPointer& kSrc, const XMetaFieldPointer& kDest ) const
     {
         const T& src = kSrc.as<T>();
         const T& dest = kDest.as<T>();
         //return *src == *dest;
     }
     
-    virtual XVoid                   copy( XMetaFieldPointer& kDest, const XMetaFieldPointer& kSrc, XUInt32 uiFlag ) const
+    virtual XVoid                       copy( XMetaFieldPointer& kDest, const XMetaFieldPointer& kSrc, XUInt32 uiFlag ) const
     {
         const T& src = kSrc.as<T>();
         T& dest = kDest.as<T>();
         //*dest = *src;
-    }
-    
-    virtual XRet                    write( const XMetaFieldPointer& kPointer, XSerializer* pkSerializer ) const
-    {
-        if ( *(T**)kPointer.getAddress() == nullptr )
-        {
-            return 1;
-        }
-        assert( pkSerializer != nullptr );
-        const XMetaClass* pkMetaClass = &XMetaClassHelper<type>::getMetaClass();
-        assert( pkMetaClass != nullptr );
-        
-        if ( kPointer.getField() != nullptr )
-        {
-            (*pkSerializer) << kPointer.getField()->getName().c_str() << " address : " << kPointer.getAddress();
-        }
-        else
-        {
-            (*pkSerializer) << pkMetaClass->getName().c_str();
-        }
-        pkSerializer->end();
-        
-        const TMapMetaFields& mapFields = pkMetaClass->getAllFields();
-        for ( auto iter = mapFields.begin(); iter != mapFields.end(); ++iter )
-        {
-            const XMetaField* pkField = iter->second;
-            const XMetaTranslator* pkTranslator = pkField->getTranslator();
-            assert( pkTranslator != nullptr );
-            
-            XMetaFieldPointer kP( (XVoid*)kPointer.getObject(), *(T**)kPointer.getAddress(), pkField );
-            pkTranslator->write( kP, pkSerializer );
-        }
-        
-        pkSerializer->end();
-        return 1;
     }
 };
 
@@ -135,38 +94,44 @@ class XTranslatorHelper<T*>
 public:
     static const XMetaTranslator*    getTranslator()
     {
-        static TClassPtrTranslator<T*> s_kIns;
+        static TPointerTranslator<T*> s_kIns;
         return &s_kIns;
     }
 };
 
-#define DECLARE_SCALOR_TRANSLATOR( t )  \
+#define DECLARE_SCALAR_TRANSLATOR( t, st )  \
 template <> \
 class XTranslatorHelper< t >    \
 {   \
 public: \
     static XMetaTranslator*    getTranslator() \
     {   \
-        static XScalorTranslator_T<t> s_kIns;    \
+        static XScalarTranslator_T<t, st> s_kIns;    \
         return &s_kIns; \
     }   \
 };
 
+DECLARE_SCALAR_TRANSLATOR( XBool, ST_BOOL );
 
-DECLARE_SCALOR_TRANSLATOR( XBool );
+DECLARE_SCALAR_TRANSLATOR( XFloat, ST_FLOAT );
+DECLARE_SCALAR_TRANSLATOR( XDouble, ST_DOUBLE );
 
-DECLARE_SCALOR_TRANSLATOR( XFloat );
-DECLARE_SCALOR_TRANSLATOR( XDouble );
 
-DECLARE_SCALOR_TRANSLATOR( XInt8 );
-DECLARE_SCALOR_TRANSLATOR( XInt16 );
-DECLARE_SCALOR_TRANSLATOR( XInt32 );
-DECLARE_SCALOR_TRANSLATOR( XInt64 );
+DECLARE_SCALAR_TRANSLATOR( XLong, ST_LONG );
+DECLARE_SCALAR_TRANSLATOR( XULong, ST_ULONG );
 
-DECLARE_SCALOR_TRANSLATOR( XUInt8 );
-DECLARE_SCALOR_TRANSLATOR( XUInt16 );
-DECLARE_SCALOR_TRANSLATOR( XUInt32 );
-DECLARE_SCALOR_TRANSLATOR( XUInt64 );
+DECLARE_SCALAR_TRANSLATOR( XInt8, ST_I8 );
+DECLARE_SCALAR_TRANSLATOR( XInt16, ST_I16 );
+DECLARE_SCALAR_TRANSLATOR( XInt32, ST_I32 );
+DECLARE_SCALAR_TRANSLATOR( XInt64, ST_I64 );
+
+DECLARE_SCALAR_TRANSLATOR( XUInt8, ST_UI8 );
+DECLARE_SCALAR_TRANSLATOR( XUInt16, ST_UI16 );
+DECLARE_SCALAR_TRANSLATOR( XUInt32, ST_UI32 );
+DECLARE_SCALAR_TRANSLATOR( XUInt64, ST_UI64 );
+
+DECLARE_SCALAR_TRANSLATOR( XString, ST_STRING );
+DECLARE_SCALAR_TRANSLATOR( XWString, ST_WSTRING );
 
 X_NS_END
 
