@@ -46,6 +46,7 @@ class X_API XMetaClass
     : public XMetaObject
 {
 protected:
+	XUInt32						m_uiCrc32;
     XUInt32                     m_uiSize;
     
     TFunMetaClassInit           m_pkFunInitFields;
@@ -67,6 +68,7 @@ private:
 public:
     XMetaClass( const XString& strName, XUInt32 size, TFunMetaClassInit fun_parents, TFunMetaClassInit fun_fields, TFunMetaClassInit fun_methods );
     
+	XUInt32						getCrc32() const { return m_uiCrc32;  }
     XUInt32                     getSize() const { return m_uiSize; }
     
     XRet                        addBaseClass( const XMetaClass* pkBase );
@@ -93,18 +95,21 @@ protected:
     XVoid                       lazyInitMethods();
 };
 
+//------------------------------------------------------------------------------
 template < typename T >
 XBool XMetaClass::isKindOf() const
 {
     return isKindOf( T::ms_kMetaClass.getName() );
 }
 
+//------------------------------------------------------------------------------
 X_FORCEINLINE XBool XMetaClass::isKindOf( const XMetaClass* pkMetaClass ) const
 {
     assert( pkMetaClass != nullptr );
     return isKindOf( pkMetaClass->getName() );
 }
 
+//------------------------------------------------------------------------------
 template< typename TC, typename TF >
 const XMetaField* XMetaClass::registerField(const XString& strName, TF TC::* f, unsigned int uiFlag )
 {
@@ -113,6 +118,7 @@ const XMetaField* XMetaClass::registerField(const XString& strName, TF TC::* f, 
     return pkField;
 }
 
+//------------------------------------------------------------------------------
 template< typename TF >
 const XMetaField* XMetaClass::registerField( const XString& strName, TF* f, unsigned int uiFlag )
 {
@@ -122,6 +128,7 @@ const XMetaField* XMetaClass::registerField( const XString& strName, TF* f, unsi
 }
 
 
+//------------------------------------------------------------------------------
 template< typename TFun >
 const XMetaMethod* XMetaClass::registerMethod( const XString& strName, TFun f ) const
 {
@@ -135,6 +142,7 @@ const XMetaMethod* XMetaClass::registerMethod( const XString& strName, TFun f ) 
 }
 
 
+//------------------------------------------------------------------------------
 X_FORCEINLINE XVoid XMetaClass::lazyInitFields()
 {
     X_RET_IF( m_bFieldsInited );
@@ -147,6 +155,7 @@ X_FORCEINLINE XVoid XMetaClass::lazyInitFields()
     m_bFieldsInited = true;
 }
 
+//------------------------------------------------------------------------------
 X_FORCEINLINE XVoid XMetaClass::lazyInitMethods()
 {
     X_RET_IF( m_bMethodsInited );
@@ -160,6 +169,7 @@ X_FORCEINLINE XVoid XMetaClass::lazyInitMethods()
 }
 
 
+//------------------------------------------------------------------------------
 #define X_DECLARE_META_CLASS( class_name )    \
 public: \
     virtual const XMetaClass* getMetaClass() const { return &ms_kMetaClass; } \

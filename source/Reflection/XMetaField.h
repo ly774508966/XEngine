@@ -31,6 +31,7 @@
 
 
 #include "XMetaObject.h"
+#include "Base/XStringUtil.h"
 #include "XMetaTranslator.h"
 
 X_NS_BEGIN
@@ -65,6 +66,7 @@ protected:
     XUInt32                 m_uiSize;
     XUInt32                 m_uiCount;
     XUInt32                 m_uiFlag;
+	XUInt32					m_uiCrc32;
     
     const XMetaTranslator*  m_pkTranslator;
     
@@ -81,6 +83,8 @@ public:
     XUInt32                 getOffset() const { return m_uiOffset; }
     XUInt32                 getSize() const { return m_uiSize; }
     XUInt32                 getCount() const { return m_uiCount; }
+	XUInt32					getFlag() const { return m_uiFlag; }
+	XUInt32					getCrc32() const { return m_uiCrc32; }
     
     XBool                   isStatic() const { return m_bStatic; }
     
@@ -88,6 +92,7 @@ public:
 };
 
 
+//------------------------------------------------------------------------------
 template< typename TC, typename TF >
 XMetaField::XMetaField( const XMetaClass* pkParent, const XString& strName, TF TC::* f, XUInt32 uiFlag )
 : XMetaObject( strName )
@@ -97,12 +102,14 @@ XMetaField::XMetaField( const XMetaClass* pkParent, const XString& strName, TF T
 , m_uiSize( sizeof( TF ) )
 , m_uiCount( TArrayHelper<TF>::getArrayCount() )
 , m_uiFlag( uiFlag )
+, m_uiCrc32( XStringUtil::crc32( strName ) )
 {
     m_pkTranslator = XTranslatorHelper< typename std::remove_extent< TF >::type >::getTranslator();
     assert( m_pkTranslator != nullptr );
 }
 
 
+//------------------------------------------------------------------------------
 template< typename TF >
 XMetaField::XMetaField( const XMetaClass* pkParent, const XString& strName, TF* f, XUInt32 uiFlag )
 : XMetaObject( strName )
@@ -111,7 +118,8 @@ XMetaField::XMetaField( const XMetaClass* pkParent, const XString& strName, TF* 
 , m_pAddress( (XVoid*)f )
 , m_uiSize( sizeof( TF ) )
 , m_uiCount( TArrayHelper<TF>::getArrayCount() )
-, m_uiFlag( uiFlag )
+, m_uiFlag(uiFlag)
+, m_uiCrc32( XStringUtil::crc32(strName) )
 {
     m_pkTranslator = XTranslatorHelper< typename std::remove_extent< TF >::type >::getTranslator();
     assert( m_pkTranslator != nullptr );

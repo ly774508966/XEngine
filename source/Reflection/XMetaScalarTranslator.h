@@ -60,6 +60,7 @@ public:
 };
 
 
+//------------------------------------------------------------------------------
 template < typename T >
 class TPointerTranslator
 : public XPointerTranslator
@@ -88,6 +89,7 @@ public:
 
 
 
+//------------------------------------------------------------------------------
 template < typename T >
 class XTranslatorHelper<T*>
 {
@@ -99,6 +101,7 @@ public:
     }
 };
 
+//------------------------------------------------------------------------------
 #define DECLARE_SCALAR_TRANSLATOR( t, st )  \
 template <> \
 class XTranslatorHelper< t >    \

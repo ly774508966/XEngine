@@ -37,7 +37,8 @@ class XMetaClass;
 class X_API XMetaSystem
 {
 public:
-    typedef std::map< XString, const XMetaClass* >    TMapMetaClasses;
+	// < crc32 -- XMetaClass >
+    typedef std::map< XUInt32, const XMetaClass* >    TMapMetaClasses;
     
 private:
     
@@ -47,7 +48,8 @@ public:
     static XMetaSystem&         getIns() { static XMetaSystem s_kIns; return s_kIns; }
     
     XRet                        registerMetaClass( const XMetaClass* pkMetaClass );
-    const XMetaClass*           getMetaClass( const XString& strName ) const;
+	const XMetaClass*           getMetaClass( const XString& strName ) const;
+	const XMetaClass*           getMetaClass( XUInt32 crc32 ) const;
     const TMapMetaClasses&      getAllMetaClasses() const { return m_mapAllMetaClasses; }
 };
 

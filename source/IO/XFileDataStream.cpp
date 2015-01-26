@@ -51,7 +51,7 @@ XRet XFileInputDataStream::open( const XString& strName )
     
     FILE* pkFile = nullptr;
 #if X_OS_WIN
-	if (_wfopen_s(&pkFile, XStringUtil::UTF8ToWide(strName).c_str(), L"rb"))
+	if (_wfopen_s(&pkFile, XStringUtil::utf8ToWide(strName).c_str(), L"rb"))
 	{
 		return X_ERROR;
 	}
@@ -94,7 +94,7 @@ XRet XFileOutputDataStream::open( const XString& strName, XBool bAppend /*= fals
     
     FILE* pkFile = nullptr;
 #if X_OS_WIN
-    _wfopen_s( &pkFile, XStringUtil::UTF8ToWide( strName ).c_str(), bAppend ? L"ab" : L"wb" );
+	_wfopen_s(&pkFile, XStringUtil::utf8ToWide(strName).c_str(), bAppend ? L"ab" : L"wb");
 #else
     pkFile = fopen( strName.c_str(), bAppend ? "ab" : "wb" );
 #endif

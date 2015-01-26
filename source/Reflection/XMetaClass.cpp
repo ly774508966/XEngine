@@ -29,13 +29,16 @@
 #include "XMetaClass.h"
 #include "XMetaField.h"
 #include "XMetaMethod.h"
+#include "Base/XStringUtil.h"
 
 X_NS_BEGIN
 
 std::map< std::string, const XMetaClass* > XMetaClass::ms_mapMetaClasses;
 
+//------------------------------------------------------------------------------
 XMetaClass::XMetaClass( const XString& strName, XUInt32 size, TFunMetaClassInit fun_parents, TFunMetaClassInit fun_fields, TFunMetaClassInit fun_methods )
 : XMetaObject( strName )
+, m_uiCrc32( XStringUtil::crc32( strName ) )
 , m_uiSize( size )
 , m_pkFunInitFields( fun_fields )
 , m_pkFunInitMethods( fun_methods )
@@ -44,6 +47,7 @@ XMetaClass::XMetaClass( const XString& strName, XUInt32 size, TFunMetaClassInit 
 {
 }
 
+//------------------------------------------------------------------------------
 XRet XMetaClass::addBaseClass( const XMetaClass* pkBase )
 {
     for ( auto iter = m_vecBaseClasses.begin();
@@ -60,6 +64,7 @@ XRet XMetaClass::addBaseClass( const XMetaClass* pkBase )
     return X_SUCCESS;
 }
 
+//------------------------------------------------------------------------------
 XBool XMetaClass::isKindOf( const XString& strTypeName ) const
 {
     X_RET_VAL_IF( strTypeName.empty(), false );
@@ -78,6 +83,7 @@ XBool XMetaClass::isKindOf( const XString& strTypeName ) const
     return false;
 }
 
+//------------------------------------------------------------------------------
 const XMetaField* XMetaClass::getFieldByName( const XString& strName ) const
 {
     const_cast<XMetaClass*>(this)->lazyInitFields();
@@ -91,6 +97,7 @@ const XMetaField* XMetaClass::getFieldByName( const XString& strName ) const
     return nullptr;
 }
 
+//------------------------------------------------------------------------------
 const TVecMetaMethods* XMetaClass::getMethodsByName( const XString& strName ) const
 {
     const_cast<XMetaClass*>(this)->lazyInitMethods();

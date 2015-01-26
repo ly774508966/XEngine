@@ -50,6 +50,11 @@ public:
     
     static XString                  wideToUTF8( const XWChar* pWide, XSize len );
     static XString                  wideToUTF8( const XWString& strWide );
+
+	static XUInt32					crc32( const XChar* pStr, XSize len );
+	static XUInt32					crc32( const XString& str );
+	static XUInt32                  crc32( const XWChar* pStr, XSize len );
+	static XUInt32                  crc32( const XWString& str );
 };
 
 
@@ -93,6 +98,20 @@ X_FORCEINLINE XString XStringUtil::wideToUTF8( const XWChar* pWide, XSize len )
 {
     std::wstring_convert< std::codecvt_utf8_utf16< XWChar > > cvt;
     return cvt.to_bytes( pWide, pWide + ( len ? len : wcslen(pWide) ) );
+}
+
+//------------------------------------------------------------------------------
+X_FORCEINLINE XUInt32 XStringUtil::crc32( const XString& str )
+{
+	X_RET_VAL_IF( str.empty(), 0 );
+	return crc32( str.c_str(), str.size() );
+}
+
+//------------------------------------------------------------------------------
+X_FORCEINLINE XUInt32 XStringUtil::crc32( const XWString& str )
+{
+	X_RET_VAL_IF( str.empty(), 0 );
+	return crc32( str.c_str(), str.size() );
 }
 
 X_NS_END

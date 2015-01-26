@@ -58,6 +58,7 @@ public:
 };
 
 
+//------------------------------------------------------------------------------
 /*
     arithmetic, enum.
  */
@@ -94,6 +95,7 @@ public:
 };
 
 
+//------------------------------------------------------------------------------
 class X_API XPointerTranslator
 : public XMetaTranslator
 {
@@ -102,6 +104,7 @@ public:
     virtual const XMetaTranslator*      getTargetTranslator() const = 0;
 };
 
+//------------------------------------------------------------------------------
 class X_API XClassTranslator
 : public XMetaTranslator
 {
@@ -111,6 +114,7 @@ public:
 };
 
 
+//------------------------------------------------------------------------------
 class X_API XContainerTranslator
 : public XMetaTranslator
 {
@@ -120,6 +124,7 @@ public:
 };
 
 
+//------------------------------------------------------------------------------
 class X_API XSequenceTranslator
 : public XContainerTranslator
 {
@@ -139,6 +144,7 @@ public:
 };
 
 
+//------------------------------------------------------------------------------
 class X_API XAssociationTranslator
 : public XContainerTranslator
 {
@@ -154,6 +160,7 @@ public:
     virtual XVoid                       remove( XMetaFieldPointer& kPointer, const XMetaFieldPointer& kKey ) = 0;
 };
 
+//------------------------------------------------------------------------------
 template < typename T >
 class XTranslatorHelper;
 

@@ -109,6 +109,7 @@ public:
     }
 };
 
+//------------------------------------------------------------------------------
 template < typename T >
 class XTranslatorHelper< std::vector< T > >
 {

@@ -34,6 +34,7 @@
 X_NS_BEGIN
 
 
+//------------------------------------------------------------------------------
 class XPatternUnknown
 : public XLogFormater::XPattern
 {
@@ -50,6 +51,7 @@ public:
     }
 };
 
+//------------------------------------------------------------------------------
 class XPatternYear
 : public XLogFormater::XPattern
 {
@@ -75,6 +77,7 @@ public:
     }
 };
 
+//------------------------------------------------------------------------------
 class XPatternMonth
 : public XLogFormater::XPattern
 {
@@ -101,6 +104,7 @@ public:
     }
 };
 
+//------------------------------------------------------------------------------
 class XPatternDay
 : public XLogFormater::XPattern
 {
@@ -127,6 +131,7 @@ public:
     }
 };
 
+//------------------------------------------------------------------------------
 class XPatternHour
 : public XLogFormater::XPattern
 {
@@ -153,6 +158,7 @@ public:
     }
 };
 
+//------------------------------------------------------------------------------
 class XPatternMin
 : public XLogFormater::XPattern
 {
@@ -179,6 +185,7 @@ public:
     }
 };
 
+//------------------------------------------------------------------------------
 class XPatternSec
 : public XLogFormater::XPattern
 {
@@ -205,6 +212,7 @@ public:
     }
 };
 
+//------------------------------------------------------------------------------
 class XPatternDate
 : public XLogFormater::XPattern
 {
@@ -285,6 +293,7 @@ public:
     }
 };
 
+//------------------------------------------------------------------------------
 class XPatternSection
 : public XLogFormater::XPattern
 {
@@ -295,6 +304,7 @@ public:
     }
 };
 
+//------------------------------------------------------------------------------
 class XPatternLevel
 : public XLogFormater::XPattern
 {
@@ -305,6 +315,7 @@ public:
     }
 };
 
+//------------------------------------------------------------------------------
 class XPatternLog
 : public XLogFormater::XPattern
 {
@@ -315,6 +326,7 @@ public:
     }
 };
 
+//------------------------------------------------------------------------------
 class XPatternFile
 : public XLogFormater::XPattern
 {
@@ -326,6 +338,7 @@ public:
     }
 };
 
+//------------------------------------------------------------------------------
 class XPatternFunction
 : public XLogFormater::XPattern
 {
@@ -336,6 +349,7 @@ public:
     }
 };
 
+//------------------------------------------------------------------------------
 class XPatternLine
 : public XLogFormater::XPattern
 {
@@ -348,6 +362,7 @@ public:
     }
 };
 
+//------------------------------------------------------------------------------
 XVoid XLogFormater::setPattern( const XString& strPattern )
 {
     X_RET_IF( strPattern.empty() );
@@ -440,6 +455,7 @@ XVoid XLogFormater::setPattern( const XString& strPattern )
     }
 }
 
+//------------------------------------------------------------------------------
 XString XLogFormater::format( const XLogElement& kLog )
 {
     XString strOut;
@@ -447,6 +463,7 @@ XString XLogFormater::format( const XLogElement& kLog )
     return strOut;
 }
 
+//------------------------------------------------------------------------------
 XVoid XLogFormater::format( XString& strOut, const XLogElement& kLog )
 {
     for ( auto i : m_vecPatterns )
@@ -457,6 +474,7 @@ XVoid XLogFormater::format( XString& strOut, const XLogElement& kLog )
 }
 
 
+//------------------------------------------------------------------------------
 XLogger::XLogger()
 : m_uiFilter( LL_ALL )
 , m_pkListener( nullptr )
@@ -464,6 +482,7 @@ XLogger::XLogger()
 }
 
 
+//------------------------------------------------------------------------------
 XVoid XLogger::log( const XString& strSection, eLogLevel level, const XString &strLog, const XString& strFile, const XString& strFunction, XUInt32 uiLine )
 {
     if ( m_uiFilter & (XUInt32)level )
@@ -488,6 +507,7 @@ XVoid XLogger::log( const XString& strSection, eLogLevel level, const XString &s
 }
 
 
+//------------------------------------------------------------------------------
 XVoid XLogger::setListener( XLogListener* pkLinstener )
 {
     XBool bOutputBuffedLog = !m_pkListener && pkLinstener && !m_vecBuffedLog.empty();

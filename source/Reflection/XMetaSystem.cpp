@@ -28,24 +28,40 @@
 
 #include "XMetaSystem.h"
 #include "XMetaClass.h"
+#include "Base/XLogger.h"
 
 X_NS_BEGIN
 
+//------------------------------------------------------------------------------
 XRet XMetaSystem::registerMetaClass( const XMetaClass* pkMetaClass )
 {
     assert( pkMetaClass );
-    return m_mapAllMetaClasses.insert( std::make_pair( pkMetaClass->getName(), pkMetaClass ) ).second ? X_SUCCESS : X_ERROR;
+	auto iter = m_mapAllMetaClasses.find( pkMetaClass->getCrc32() );
+	if ( iter != m_mapAllMetaClasses.end() )
+	{
+		X_LOG_ERROR( "failed to register meta class[ " << pkMetaClass->getName() << " ]. "
+			"crc32[ " << iter->second->getCrc32() << " ] of meta class[ " << iter->second->getName() << " ] already exist!" );
+		return X_ERROR;
+	}
+    return m_mapAllMetaClasses.insert( std::make_pair( pkMetaClass->getCrc32(), pkMetaClass ) ).second ? X_SUCCESS : X_ERROR;
 }
 
-const XMetaClass* XMetaSystem::getMetaClass( const XString& strName ) const
+//------------------------------------------------------------------------------
+X_FORCEINLINE const XMetaClass* XMetaSystem::getMetaClass( const XString& strName ) const
 {
-    auto iter = m_mapAllMetaClasses.find( strName );
-    if ( iter != m_mapAllMetaClasses.end() )
-    {
-        return iter->second;
-    }
-    
-    return nullptr;
+	return getMetaClass( XStringUtil::crc32( strName ) );
+}
+
+//------------------------------------------------------------------------------
+const XMetaClass* XMetaSystem::getMetaClass( XUInt32 crc32 ) const
+{
+	auto iter = m_mapAllMetaClasses.find( crc32 );
+	if( iter != m_mapAllMetaClasses.end() )
+	{
+		return iter->second;
+	}
+
+	return nullptr;
 }
 
 X_NS_END
