@@ -9,7 +9,7 @@ set ( REFLECTION_FILES
 	Reflection/XMetaMethod.h
 	Reflection/XMetaMethod.cpp
 	Reflection/XMetaTranslator.h
-	Reflection/XMetaScalarTranslator.h
+	Reflection/XMetaPrimitiveTranslator.h
 	Reflection/XMetaClassTranslator.h
 	Reflection/XMetaSTLTranslator.h
 	Reflection/XMetaSystem.h

@@ -30,7 +30,7 @@
 #define __XMETAENUM_H__
 
 
-#include "XMetaObject.h"
+#include "Base/XPreDef.h"
 #include "XMetaSystem.h"
 
 X_NS_BEGIN
@@ -56,16 +56,18 @@ typedef std::vector< XMetaEnumElement > TVecMetaEnumElements;
 typedef XVoid (*TFunMetaEnumInit)( XMetaEnum& );
 
 class X_API XMetaEnum
-    : public XMetaObject
 {
+	X_DECLARE_NO_COPY_CLASS( XMetaEnum );
 protected:
+	XString						m_strName;
     XUInt32						m_uiCrc32;
     TFunMetaEnumInit            m_pkFunInit;
     XBool                       m_bInited;
     TVecMetaEnumElements        m_vecElements;
 public:
     XMetaEnum( const XString& strName, TFunMetaEnumInit f );
-    
+
+	const XString&				getName() const { return m_strName; }
     XUInt32						getCrc32() const { return m_uiCrc32;  }
     
     XRet                        addElement( const XString& strName, XUInt32 value );

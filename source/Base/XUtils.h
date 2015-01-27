@@ -63,7 +63,7 @@
 
 // ---------------------------------------------------------------------------
 // macro to define a class without copy ctor nor assignment operator.
-#define X_NO_COPY_CLASS( classname )        \
+#define X_DECLARE_NO_COPY_CLASS( classname )        \
     private:                                \
     classname(const classname&);            \
     classname& operator=(const classname&);

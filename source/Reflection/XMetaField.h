@@ -30,7 +30,7 @@
 #define __XMETAFIELD_H__
 
 
-#include "XMetaObject.h"
+#include "Base/XPreDef.h"
 #include "Base/XStringUtil.h"
 #include "XMetaTranslator.h"
 
@@ -51,11 +51,14 @@ enum eMetaFieldFlag
 
 class XMetaTranslator;
 class X_API XMetaField
-    : public XMetaObject
 {
+	X_DECLARE_NO_COPY_CLASS( XMetaField );
+public:
     friend class XMetaFieldPointer;
 protected:
     const XMetaClass*       m_pkParent;
+
+	XString					m_strName;
     
     XBool                   m_bStatic;
     union
@@ -79,7 +82,8 @@ public:
     template< typename TF >
     XMetaField( const XMetaClass* pkParent, const XString& strName, TF* f, XUInt32 uiFlag );
     
-    const XMetaClass*       GetParent() const { return m_pkParent; }
+	const XMetaClass*       GetParent() const { return m_pkParent; }
+	const XString&			getName() const { return m_strName; }
     XUInt32                 getOffset() const { return m_uiOffset; }
     XUInt32                 getSize() const { return m_uiSize; }
     XUInt32                 getCount() const { return m_uiCount; }
@@ -95,7 +99,7 @@ public:
 //------------------------------------------------------------------------------
 template< typename TC, typename TF >
 XMetaField::XMetaField( const XMetaClass* pkParent, const XString& strName, TF TC::* f, XUInt32 uiFlag )
-: XMetaObject( strName )
+: m_strName( strName )
 , m_pkParent( pkParent )
 , m_bStatic( false )
 , m_uiOffset( nsXE::getOffset(f) )
@@ -104,7 +108,7 @@ XMetaField::XMetaField( const XMetaClass* pkParent, const XString& strName, TF T
 , m_uiFlag( uiFlag )
 , m_uiCrc32( XStringUtil::crc32( strName ) )
 {
-    m_pkTranslator = XTranslatorHelper< typename std::remove_extent< TF >::type >::getTranslator();
+    m_pkTranslator = XMetaTranslatorHelper< typename std::remove_extent< TF >::type >::getTranslator();
     assert( m_pkTranslator != nullptr );
 }
 
@@ -112,7 +116,7 @@ XMetaField::XMetaField( const XMetaClass* pkParent, const XString& strName, TF T
 //------------------------------------------------------------------------------
 template< typename TF >
 XMetaField::XMetaField( const XMetaClass* pkParent, const XString& strName, TF* f, XUInt32 uiFlag )
-: XMetaObject( strName )
+: m_strName( strName )
 , m_pkParent( pkParent )
 , m_bStatic( true )
 , m_pAddress( (XVoid*)f )
@@ -121,7 +125,7 @@ XMetaField::XMetaField( const XMetaClass* pkParent, const XString& strName, TF* 
 , m_uiFlag(uiFlag)
 , m_uiCrc32( XStringUtil::crc32(strName) )
 {
-    m_pkTranslator = XTranslatorHelper< typename std::remove_extent< TF >::type >::getTranslator();
+    m_pkTranslator = XMetaTranslatorHelper< typename std::remove_extent< TF >::type >::getTranslator();
     assert( m_pkTranslator != nullptr );
 }
 

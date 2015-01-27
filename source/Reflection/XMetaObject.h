@@ -34,20 +34,12 @@
 
 X_NS_BEGIN
 
+class XMetaClass;
 class X_API XMetaObject
 {
-protected:
-    XString             m_strName;
-    
 public:
-    XMetaObject( const XString& strName )
-        : m_strName( strName )
-    {
-        
-    }
-    virtual ~XMetaObject() {}
-    
-    const XString&      getName() const { return m_strName; }
+	virtual ~XMetaObject() {}
+	virtual const XMetaClass* getMetaClass() const = 0;
 };
 
 X_NS_END

@@ -33,7 +33,7 @@ X_NS_BEGIN
 
 //------------------------------------------------------------------------------
 XMetaEnum::XMetaEnum( const XString& strName, TFunMetaEnumInit f )
-: XMetaObject( strName )
+: m_strName( strName )
 , m_uiCrc32( XStringUtil::crc32( strName ) )
 , m_pkFunInit( f )
 {

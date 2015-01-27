@@ -29,7 +29,7 @@
 #ifndef __XMETACLASS_H__
 #define __XMETACLASS_H__
 
-#include "XMetaObject.h"
+#include "Base/XPreDef.h"
 #include "XMetaField.h"
 #include "XMetaMethod.h"
 #include "XMetaSystem.h"
@@ -44,9 +44,11 @@ typedef XVoid (*TFunMetaClassInit)( XMetaClass& );
 #define RET_BASE_CLASS_ALREADY_EXIST    -1
 
 class X_API XMetaClass
-    : public XMetaObject
 {
+	X_DECLARE_NO_COPY_CLASS( XMetaClass );
+
 protected:
+	XString						m_strName;
 	XUInt32						m_uiCrc32;
     XUInt32                     m_uiSize;
     
@@ -68,7 +70,8 @@ private:
     
 public:
     XMetaClass( const XString& strName, XUInt32 size, TFunMetaClassInit fun_parents, TFunMetaClassInit fun_fields, TFunMetaClassInit fun_methods );
-    
+
+	const XString&				getName() const { return m_strName; }
 	XUInt32						getCrc32() const { return m_uiCrc32;  }
     XUInt32                     getSize() const { return m_uiSize; }
     
@@ -173,7 +176,7 @@ X_FORCEINLINE XVoid XMetaClass::lazyInitMethods()
 //------------------------------------------------------------------------------
 #define X_DECLARE_META_CLASS( class_name )    \
 public: \
-    virtual const XMetaClass* getMetaClass() const { return &ms_kMetaClass; } \
+    virtual const XMetaClass* getMetaClass() const override { return &ms_kMetaClass; } \
     static const XMetaClass ms_kMetaClass;    \
     static XRet ms_registerRet;   \
     static XVoid buildMetaParents( XMetaClass& kMetaClass );    \

@@ -35,7 +35,7 @@ X_NS_BEGIN
 
 template < typename T >
 class X_API XSequenceTranslator_Vector
-: public XSequenceTranslator
+: public XMetaSequenceTranslator
 {
     typedef typename T::value_type  value_type;
 public:
@@ -62,7 +62,7 @@ public:
         kVector.clear();
     }
     
-    virtual const XMetaTranslator*  getItemTranslator() const { return XTranslatorHelper<value_type>::getTranslator(); }
+    virtual const XMetaTranslator*  getItemTranslator() const { return XMetaTranslatorHelper<value_type>::getTranslator(); }
     
     virtual XVoid                   resize( XMetaFieldPointer& kPointer, XUInt32 uiLength )
     {
@@ -111,7 +111,7 @@ public:
 
 //------------------------------------------------------------------------------
 template < typename T >
-class XTranslatorHelper< std::vector< T > >
+class XMetaTranslatorHelper< std::vector< T > >
 {
 public:
     static const XMetaTranslator*   getTranslator()

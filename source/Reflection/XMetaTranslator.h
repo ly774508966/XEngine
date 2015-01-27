@@ -31,27 +31,29 @@
 
 X_NS_BEGIN
 
+template < typename T >
+class XMetaTranslatorHelper;
 
-enum eMetaTranslatorType
+
+//------------------------------------------------------------------------------
+enum class XMetaTranslatorType
 {
-    SCALAR = 0,
-    POINTER,
-    CLASS,
-    SEQUENTIAL_CONTAINER,
-    ASSOCIATIVE_CONTAINER,
-    UNKNOWN
+	PRIMITIVE,
+	POINTER,
+	CLASS,
+	SEQUENTIAL_CONTAINER,
+	ASSOCIATIVE_CONTAINER,
+	UNKNOWN
 };
 
 class XMetaFieldPointer;
-class XMetaClass;
 class X_API XMetaTranslator
 {
-    
-protected:
-
 public:
+
+	virtual ~XMetaTranslator() {}
     
-    virtual eMetaTranslatorType         getTranslatorType() const = 0;
+    virtual XMetaTranslatorType         getTranslatorType() const = 0;
     
     virtual XBool                       equals( const XMetaFieldPointer& kSrc, const XMetaFieldPointer& kDest ) const = 0;
     virtual XVoid                       copy( XMetaFieldPointer& kDest, const XMetaFieldPointer& kSrc, XUInt32 uiFlag ) const = 0;
@@ -59,63 +61,61 @@ public:
 
 
 //------------------------------------------------------------------------------
-/*
-    arithmetic, enum.
- */
-enum eScalarType
+enum class XMetaPrimitiveType
 {
-    ST_BOOL,
+    BOOL,
     
-    ST_FLOAT,
-    ST_DOUBLE,
+    FLOAT,
+    DOUBLE,
     
-    ST_LONG,
-    ST_ULONG,
+    LONG,
+    ULONG,
     
-    ST_I8,
-    ST_I16,
-    ST_I32,
-    ST_I64,
+    I8,
+    I16,
+    I32,
+    I64,
     
-    ST_UI8,
-    ST_UI16,
-    ST_UI32,
-    ST_UI64,
+    UI8,
+    UI16,
+    UI32,
+    UI64,
     
-    ST_STRING,
-    ST_WSTRING,
+    STRING,
+    WSTRING,
 };
-class X_API XScalarTranslator
+class X_API XMetaPrimitiveTranslator
 : public XMetaTranslator
 {
 public:
-    virtual eMetaTranslatorType         getTranslatorType() const { return SCALAR; }
+	virtual XMetaTranslatorType         getTranslatorType() const { return XMetaTranslatorType::PRIMITIVE; }
     
-    virtual eScalarType                 getScalarType() const = 0;
+	virtual XMetaPrimitiveType          getPrimitiveType() const = 0;
 };
 
 
 //------------------------------------------------------------------------------
-class X_API XPointerTranslator
-: public XMetaTranslator
+class X_API XMetaPointerTranslator
+	: public XMetaTranslator
 {
 public:
-    virtual eMetaTranslatorType         getTranslatorType() const { return POINTER; }
-    virtual const XMetaTranslator*      getTargetTranslator() const = 0;
+	virtual XMetaTranslatorType         getTranslatorType() const override { return XMetaTranslatorType::POINTER; }
+	virtual const XMetaTranslator*      getTargetTranslator() const = 0;
 };
 
 //------------------------------------------------------------------------------
-class X_API XClassTranslator
-: public XMetaTranslator
+class XMetaClass;
+class X_API XMetaClassTranslator
+	: public XMetaTranslator
 {
 public:
-    virtual eMetaTranslatorType         getTranslatorType() const { return CLASS; }
-    virtual const XMetaClass*           getMetaClass() const = 0;
+	virtual XMetaTranslatorType         getTranslatorType() const override { return XMetaTranslatorType::CLASS; }
+	virtual const XMetaClass*           getMetaClass() const = 0;
 };
 
 
 //------------------------------------------------------------------------------
-class X_API XContainerTranslator
+class X_API XMetaContainerTranslator
 : public XMetaTranslator
 {
 public:
@@ -125,12 +125,12 @@ public:
 
 
 //------------------------------------------------------------------------------
-class X_API XSequenceTranslator
-: public XContainerTranslator
+class X_API XMetaSequenceTranslator
+: public XMetaContainerTranslator
 {
 public:
     
-    virtual eMetaTranslatorType         getTranslatorType() const { return SEQUENTIAL_CONTAINER; }
+	virtual XMetaTranslatorType         getTranslatorType() const override { return XMetaTranslatorType::SEQUENTIAL_CONTAINER; }
     
     virtual const XMetaTranslator*      getItemTranslator() const = 0;
     
@@ -145,12 +145,12 @@ public:
 
 
 //------------------------------------------------------------------------------
-class X_API XAssociationTranslator
-: public XContainerTranslator
+class X_API XMetaAssociationTranslator
+: public XMetaContainerTranslator
 {
 public:
     
-    virtual eMetaTranslatorType         getTranslatorType() const { return ASSOCIATIVE_CONTAINER; }
+	virtual XMetaTranslatorType         getTranslatorType() const override { return XMetaTranslatorType::ASSOCIATIVE_CONTAINER; }
     
     virtual const XMetaTranslator*      getKeyTranslator() const = 0;
     virtual const XMetaTranslator*      getValueTranslator() const = 0;
@@ -159,10 +159,6 @@ public:
     virtual XMetaFieldPointer           getItem( XMetaFieldPointer& kPointer, const XMetaFieldPointer& kKey ) = 0;
     virtual XVoid                       remove( XMetaFieldPointer& kPointer, const XMetaFieldPointer& kKey ) = 0;
 };
-
-//------------------------------------------------------------------------------
-template < typename T >
-class XTranslatorHelper;
 
 X_NS_END
 

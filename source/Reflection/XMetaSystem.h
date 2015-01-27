@@ -37,6 +37,7 @@ class XMetaClass;
 class XMetaEnum;
 class X_API XMetaSystem
 {
+	X_DECLARE_NO_COPY_CLASS( XMetaSystem );
 public:
 	// < crc32 -- XMetaClass >
     typedef std::map< XUInt32, const XMetaClass* >      TMapMetaClasses;
@@ -47,7 +48,8 @@ private:
     TMapMetaClasses             m_mapAllMetaClasses;
     TMapMetaEnums               m_mapAllMetaEnums;
 public:
-    
+	XMetaSystem() {}
+
     static XMetaSystem&         getIns() { static XMetaSystem s_kIns; return s_kIns; }
     
     XRet                        registerMetaClass( const XMetaClass* pkMetaClass );

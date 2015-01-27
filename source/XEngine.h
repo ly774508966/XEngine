@@ -42,7 +42,7 @@
 #include "Reflection/XMetaClass.h"
 #include "Reflection/XMetaField.h"
 #include "Reflection/XMetaTranslator.h"
-#include "Reflection/XMetaScalarTranslator.h"
+#include "Reflection/XMetaPrimitiveTranslator.h"
 #include "Reflection/XMetaClasstranslator.h"
 #include "Reflection/XMetaSTLTranslator.h"
 

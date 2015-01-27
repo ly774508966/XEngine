@@ -35,7 +35,7 @@ X_NS_BEGIN
 
 template < typename T >
 class XClassTranslator_T
-: public XClassTranslator
+: public XMetaClassTranslator
 {
 public:
     virtual const XMetaClass*           getMetaClass() const { return &T::ms_kMetaClass; }
@@ -52,7 +52,7 @@ public:
 };
 
 template < typename T >
-class XTranslatorHelper
+class XMetaTranslatorHelper
 {
 public:
     static const XMetaTranslator*    getTranslator()

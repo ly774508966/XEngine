@@ -35,14 +35,16 @@
 X_NS_BEGIN
 
 
-template < typename T, eScalarType ST >
-class XScalarTranslator_T
-: public XScalarTranslator
+template < typename T, XMetaPrimitiveType PT >
+class XMetaPrimitiveTranslator_T
+	: public XMetaPrimitiveTranslator
 {
     
 public:
     
-    virtual eScalarType                 getScalarType() const { return ST; }
+	virtual XMetaPrimitiveType         getPrimitiveType() const override {
+		return PT;
+	}
     
     virtual XBool                       equals( const XMetaFieldPointer& kSrc, const XMetaFieldPointer& kDest ) const
     {
@@ -63,13 +65,13 @@ public:
 //------------------------------------------------------------------------------
 template < typename T >
 class TPointerTranslator
-: public XPointerTranslator
+: public XMetaPointerTranslator
 {
 public:
     
     virtual const XMetaTranslator*      getTargetTranslator() const
     {
-        return XTranslatorHelper< typename std::remove_pointer<T>::type >::getTranslator();
+        return XMetaTranslatorHelper< typename std::remove_pointer<T>::type >::getTranslator();
     }
     
     virtual XBool                       equals( const XMetaFieldPointer& kSrc, const XMetaFieldPointer& kDest ) const
@@ -91,7 +93,7 @@ public:
 
 //------------------------------------------------------------------------------
 template < typename T >
-class XTranslatorHelper<T*>
+class XMetaTranslatorHelper<T*>
 {
 public:
     static const XMetaTranslator*    getTranslator()
@@ -102,39 +104,39 @@ public:
 };
 
 //------------------------------------------------------------------------------
-#define DECLARE_SCALAR_TRANSLATOR( t, st )  \
+#define X_DECLARE_PRIMITIVE_TRANSLATOR( t, st )  \
 template <> \
 class XTranslatorHelper< t >    \
 {   \
 public: \
     static XMetaTranslator*    getTranslator() \
     {   \
-        static XScalarTranslator_T<t, st> s_kIns;    \
+        static XMetaPrimitiveTranslator_T<t, st> s_kIns;    \
         return &s_kIns; \
     }   \
 };
 
-DECLARE_SCALAR_TRANSLATOR( XBool, ST_BOOL );
+X_DECLARE_PRIMITIVE_TRANSLATOR( XBool, XMetaPrimitiveType::BOOL );
 
-DECLARE_SCALAR_TRANSLATOR( XFloat, ST_FLOAT );
-DECLARE_SCALAR_TRANSLATOR( XDouble, ST_DOUBLE );
+X_DECLARE_PRIMITIVE_TRANSLATOR( XFloat, XMetaPrimitiveType::FLOAT );
+X_DECLARE_PRIMITIVE_TRANSLATOR( XDouble, XMetaPrimitiveType::DOUBLE );
 
 
-DECLARE_SCALAR_TRANSLATOR( XLong, ST_LONG );
-DECLARE_SCALAR_TRANSLATOR( XULong, ST_ULONG );
+X_DECLARE_PRIMITIVE_TRANSLATOR( XLong, XMetaPrimitiveType::LONG );
+X_DECLARE_PRIMITIVE_TRANSLATOR( XULong, XMetaPrimitiveType::ULONG );
 
-DECLARE_SCALAR_TRANSLATOR( XInt8, ST_I8 );
-DECLARE_SCALAR_TRANSLATOR( XInt16, ST_I16 );
-DECLARE_SCALAR_TRANSLATOR( XInt32, ST_I32 );
-DECLARE_SCALAR_TRANSLATOR( XInt64, ST_I64 );
+X_DECLARE_PRIMITIVE_TRANSLATOR( XInt8, XMetaPrimitiveType::I8 );
+X_DECLARE_PRIMITIVE_TRANSLATOR( XInt16, XMetaPrimitiveType::I16 );
+X_DECLARE_PRIMITIVE_TRANSLATOR( XInt32, XMetaPrimitiveType::I32 );
+X_DECLARE_PRIMITIVE_TRANSLATOR( XInt64, XMetaPrimitiveType::I64 );
 
-DECLARE_SCALAR_TRANSLATOR( XUInt8, ST_UI8 );
-DECLARE_SCALAR_TRANSLATOR( XUInt16, ST_UI16 );
-DECLARE_SCALAR_TRANSLATOR( XUInt32, ST_UI32 );
-DECLARE_SCALAR_TRANSLATOR( XUInt64, ST_UI64 );
+X_DECLARE_PRIMITIVE_TRANSLATOR( XUInt8, XMetaPrimitiveType::UI8 );
+X_DECLARE_PRIMITIVE_TRANSLATOR( XUInt16, XMetaPrimitiveType::UI16 );
+X_DECLARE_PRIMITIVE_TRANSLATOR( XUInt32, XMetaPrimitiveType::UI32 );
+X_DECLARE_PRIMITIVE_TRANSLATOR( XUInt64, XMetaPrimitiveType::UI64 );
 
-DECLARE_SCALAR_TRANSLATOR( XString, ST_STRING );
-DECLARE_SCALAR_TRANSLATOR( XWString, ST_WSTRING );
+X_DECLARE_PRIMITIVE_TRANSLATOR( XString, XMetaPrimitiveType::STRING );
+X_DECLARE_PRIMITIVE_TRANSLATOR( XWString, XMetaPrimitiveType::WSTRING );
 
 X_NS_END
 
