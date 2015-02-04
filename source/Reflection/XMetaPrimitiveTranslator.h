@@ -26,20 +26,20 @@
  **
  ******************************************************************************/
 
-#ifndef __XMETATPOINTERTRANSLATOR_H__
-#define __XMETATPOINTERTRANSLATOR_H__
+#ifndef __XMETASCALARTRANSLATOR_H__
+#define __XMETASCALARTRANSLATOR_H__
 
 #include "XMetaTranslator.h"
+#include "XMetaField.h"
 
 X_NS_BEGIN
 
 
-//------------------------------------------------------------------------------
-template < typename T >
-class TPointerTranslator
-: public XMetaPointerTranslator
+template < typename T, XMetaPrimitiveType PT >
+class XMetaPrimitiveTranslator_T
+	: public XMetaPrimitiveTranslator
 {
-    typedef typename std::remove_pointer<T>::type TTargetType;
+    
 public:
     
     virtual XVoid*                      newObj() const override { return XMetaTranslator::defaultNewObj<T>(); }
@@ -48,36 +48,57 @@ public:
     virtual XVoid                       construct( XVoid* pAddress ) const override { XMetaTranslator::defaultConstruct<T>( pAddress ); }
     virtual XVoid                       destruct( XVoid* pAddress ) const override { XMetaTranslator::defaultDestruct<T>( pAddress ); }
     
-    virtual const XMetaTranslator*      getTargetTranslator() const
-    {
-        return getMetaTranslator< TTargetType >();
-    }
+	virtual XMetaPrimitiveType          getPrimitiveType() const override { return PT; }
     
     virtual XBool                       equals( const XVoid* pA, const XVoid* pB ) const override
     {
-        return getTargetTranslator()->equals( *(const XVoid**)pA, *(const XVoid**)pB );
+        X_RET_VAL_IF( pA == pB, true );
+        const T& kA = *(T*)pA;
+        const T& kB = *(T*)pB;
+        return kA == kB;
     }
-    
     virtual XVoid                       assign( XVoid* pDest, const XVoid* pSrc, XUInt32 uiFlag ) const override
     {
-        return getTargetTranslator()->assign( *(XVoid**)pDest, *(const XVoid**)pSrc, uiFlag );
+        X_RET_IF( pDest == pSrc );
+        T& kDest = *(T*)pDest;
+        const T& kSrc = *(const T*)pSrc;
+        kDest = kSrc;
     }
 };
 
+#define X_META_PRIMITIVE_TYPE_TRAVERSAL( op )       \
+    op( XMetaPrimitiveType::BOOL, XBool );          \
+    op( XMetaPrimitiveType::FLOAT, XFloat );        \
+    op( XMetaPrimitiveType::DOUBLE, XDouble );      \
+    op( XMetaPrimitiveType::LONG, XLong );          \
+    op( XMetaPrimitiveType::ULONG, XULong );        \
+    op( XMetaPrimitiveType::I8, XInt8 );            \
+    op( XMetaPrimitiveType::I16, XInt16 );          \
+    op( XMetaPrimitiveType::I32, XInt32 );          \
+    op( XMetaPrimitiveType::I64, XInt64 );          \
+    op( XMetaPrimitiveType::UI8, XUInt8 );          \
+    op( XMetaPrimitiveType::UI16, XUInt16 );        \
+    op( XMetaPrimitiveType::UI32, XUInt32 );        \
+    op( XMetaPrimitiveType::UI64, XUInt64 );        \
+    op( XMetaPrimitiveType::STRING, XString );      \
+    op( XMetaPrimitiveType::WSTRING, XWString );
 
 //------------------------------------------------------------------------------
-template < typename T >
-class XMetaTranslatorHelper<T*>
-{
-public:
-    static const XMetaTranslator*    getTranslator()
-    {
-        static_assert( std::is_pointer<T*>::value, "must pointer type!" );
-        static TPointerTranslator<T*> s_kIns;
-        return &s_kIns;
-    }
+#define X_DECLARE_PRIMITIVE_TRANSLATOR( pt, t )  \
+template <> \
+class XMetaTranslatorHelper< t >    \
+{   \
+public: \
+    static XMetaTranslator*    getTranslator() \
+    {   \
+        static_assert( std::is_arithmetic<t>::value || std::is_same<t,XString>::value || std::is_same<t,XWString>::value, "must arithmetic!" );    \
+        static XMetaPrimitiveTranslator_T<t, pt> s_kIns;    \
+        return &s_kIns; \
+    }   \
 };
+
+X_META_PRIMITIVE_TYPE_TRAVERSAL( X_DECLARE_PRIMITIVE_TRANSLATOR )
 
 X_NS_END
 
-#endif // __XMETATPOINTERTRANSLATOR_H__
+#endif // __XMETASCALARTRANSLATOR_H__
