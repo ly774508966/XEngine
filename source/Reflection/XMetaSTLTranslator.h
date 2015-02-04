@@ -155,7 +155,7 @@ public:
 
 //------------------------------------------------------------------------------
 template < typename T >
-class X_API XSequenceTranslator_Map
+class X_API XAssociationTranslator_Map
 : public XMetaAssociationTranslator
 {
 public:
@@ -279,7 +279,7 @@ class XMetaTranslatorHelper< std::map< TKey, TItem > >
 public:
     static const XMetaTranslator*   getTranslator()
     {
-        static XSequenceTranslator_Map< std::map< TKey, TItem > > s_kIns;
+        static XAssociationTranslator_Map< std::map< TKey, TItem > > s_kIns;
         return &s_kIns;
     }
 };
