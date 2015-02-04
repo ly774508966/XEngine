@@ -99,8 +99,8 @@ public:
 //------------------------------------------------------------------------------
 template< typename TC, typename TF >
 XMetaField::XMetaField( const XMetaClass* pkParent, const XString& strName, TF TC::* f, XUInt32 uiFlag )
-: m_strName( strName )
-, m_pkParent( pkParent )
+: m_pkParent( pkParent )
+, m_strName( strName )
 , m_bStatic( false )
 , m_uiOffset( nsXE::getOffset(f) )
 , m_uiSize( sizeof( TF ) )
@@ -108,7 +108,7 @@ XMetaField::XMetaField( const XMetaClass* pkParent, const XString& strName, TF T
 , m_uiFlag( uiFlag )
 , m_uiCrc32( XStringUtil::crc32( strName ) )
 {
-    m_pkTranslator = XMetaTranslatorHelper< typename std::remove_extent< TF >::type >::getTranslator();
+    m_pkTranslator = getMetaTranslator<TF>();
     assert( m_pkTranslator != nullptr );
 }
 
@@ -116,8 +116,8 @@ XMetaField::XMetaField( const XMetaClass* pkParent, const XString& strName, TF T
 //------------------------------------------------------------------------------
 template< typename TF >
 XMetaField::XMetaField( const XMetaClass* pkParent, const XString& strName, TF* f, XUInt32 uiFlag )
-: m_strName( strName )
-, m_pkParent( pkParent )
+: m_pkParent( pkParent )
+, m_strName( strName )
 , m_bStatic( true )
 , m_pAddress( (XVoid*)f )
 , m_uiSize( sizeof( TF ) )
@@ -125,30 +125,26 @@ XMetaField::XMetaField( const XMetaClass* pkParent, const XString& strName, TF* 
 , m_uiFlag(uiFlag)
 , m_uiCrc32( XStringUtil::crc32(strName) )
 {
-    m_pkTranslator = XMetaTranslatorHelper< typename std::remove_extent< TF >::type >::getTranslator();
+    m_pkTranslator = getMetaTranslator<TF>();
     assert( m_pkTranslator != nullptr );
 }
 
 
 
+class XMetaObject;
 class X_API XMetaFieldPointer
 {
 protected:
-    XVoid*              m_pObj;
+    XMetaObject*        m_pObj;
     const XMetaField*   m_pkField;
     XVoid*              m_pAddress;
 public:
-    XMetaFieldPointer( XVoid* pObj )
-    : m_pObj( pObj )
-    , m_pkField( nullptr )
-    , m_pAddress( m_pObj )
-    {
-    }
     
-    XMetaFieldPointer( XVoid* pObj, const XMetaField* pkField, XUInt32 uiIdx = 0 )
+    XMetaFieldPointer( XMetaObject* pObj, const XMetaField* pkField, XUInt32 uiIdx = 0 )
     : m_pObj( pObj )
     , m_pkField( pkField )
     {
+        assert( m_pObj && m_pkField );
         if ( pkField->isStatic() )
         {
             m_pAddress = (XVoid*)( (XChar*)(m_pkField->m_pAddress) + ( m_pkField->m_uiSize / m_pkField->m_uiCount ) * uiIdx );
@@ -160,10 +156,11 @@ public:
         }
     }
     
-    XMetaFieldPointer( XVoid* pObj, XVoid* pComposite, const XMetaField* pkField, XUInt32 uiIdx = 0 )
+    XMetaFieldPointer( XMetaObject* pObj, XVoid* pComposite, const XMetaField* pkField, XUInt32 uiIdx = 0 )
     : m_pObj( pObj )
     , m_pkField( pkField )
     {
+        assert( m_pObj && m_pkField && pComposite );
         if ( pkField->isStatic() )
         {
             m_pAddress = (XVoid*)( (XChar*)(m_pkField->m_pAddress) + ( m_pkField->m_uiSize / m_pkField->m_uiCount ) * uiIdx );
@@ -175,13 +172,6 @@ public:
         }
     }
     
-    XMetaFieldPointer( XVoid* pRaw, const XMetaField* pkField, XVoid* pObj )
-    : m_pObj( pObj )
-    , m_pkField( pkField )
-    , m_pAddress( pRaw )
-    {
-    }
-    
     template < typename T >
     T& as() { return *(T*)&((const XMetaFieldPointer*)(this))->as<T>(); }
     
@@ -189,7 +179,7 @@ public:
     const T& as() const { return *reinterpret_cast< const T* >( m_pAddress ); }
     
     XVoid*              getAddress() const { return m_pAddress; }
-    XVoid*              getObject() const { return m_pObj; }
+    XMetaObject*        getObject() const { return m_pObj; }
     const XMetaField*   getField() const { return m_pkField; }
 };
 

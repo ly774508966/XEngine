@@ -39,7 +39,13 @@ class X_API XMetaObject
 {
 public:
 	virtual ~XMetaObject() {}
-	virtual const XMetaClass* getMetaClass() const = 0;
+	virtual const XMetaClass*   getMetaClass() const = 0;
+    
+    virtual XVoid               preSerialize() {};
+    virtual XVoid               postSerialize() {};
+    
+    virtual XVoid               preDeserialize() {};
+    virtual XVoid               postDeserialize() {};
 };
 
 X_NS_END

@@ -38,26 +38,24 @@ class X_API XFileInputDataStream
 {
 public:
     
-    XFileInputDataStream();
+    explicit XFileInputDataStream( const XString& strName );
+    explicit XFileInputDataStream( const XChar* pName );
     ~XFileInputDataStream();
     
-    XRet                        open( const XString& strName );
-    XRet                        open( FILE* pkFile );
+    /** Read the requisite number of bytes from the stream, stopping at the end of the file. */
+    virtual XSize               read( XVoid* pkBuffer, XSize uiNumOfBytesToRead ) override;
     
     /** Close the stream; this makes further operations invalid. */
-    virtual XVoid				close();
-    
-    /** Read the requisite number of bytes from the stream, stopping at the end of the file. */
-    virtual XSize               read( XVoid* pkBuffer, XSize uiNumOfBytesToRead );
+    virtual XVoid				close() override;
     
     /** Repositions the read point to a specified byte. */
-    virtual XRet				seek( XSize offset, eSeekMode mode );
+    virtual XRet				seek( XSize offset, XStreamSeekMode mode = XStreamSeekMode::CUR ) override;
     
     /** Returns the current byte offset from beginning */
-    virtual XSize				tell() const;
+    virtual XSize				tell() const override;
     
     /** Returns true if the stream has reached the end. */
-    virtual XBool				eof() const;
+    virtual XBool				eof() const override;
     
     XBool						isError() const { return m_pkFile == nullptr || ( ferror( m_pkFile ) != 0 ); }
     
@@ -71,24 +69,13 @@ class X_API XFileOutputDataStream
 {
 public:
     
-    XFileOutputDataStream();
+    XFileOutputDataStream( const XString& strName, XBool bAppend = false );
     ~XFileOutputDataStream();
     
-    XRet                        open( const XString& strName, XBool bAppend = false );
-    XRet                        open( FILE* pkFile );
     XBool						isError() const { return m_pkFile == nullptr || ( ferror( m_pkFile ) != 0 ); }
-    
+
     /** Close the stream; this makes further operations invalid. */
     virtual XVoid				close();
-    
-    /** Repositions the read point to a specified byte. */
-    virtual XRet				seek( XSize offset, eSeekMode mode );
-    
-    /** Returns the current byte offset from beginning */
-    virtual XSize				tell() const;
-    
-    /** Returns true if the stream has reached the end. */
-    virtual XBool				eof() const;
     
     virtual XVoid               flush();
     
@@ -109,11 +96,11 @@ X_FORCEINLINE XSize XFileInputDataStream::read( XVoid* pkBuffer, XSize uiNumOfBy
 }
 
 //------------------------------------------------------------------------------
-X_FORCEINLINE XRet XFileInputDataStream::seek( XSize offset, eSeekMode mode )
+X_FORCEINLINE XRet XFileInputDataStream::seek( XSize offset, XStreamSeekMode mode )
 {
     if ( m_pkFile )
     {
-        return ( fseek( m_pkFile, offset, mode ) == 0 ) ? X_SUCCESS : X_ERROR;
+        return ( fseek( m_pkFile, offset, (int)mode ) == 0 ) ? X_SUCCESS : X_ERROR;
     }
     
     return X_ERROR;
@@ -138,30 +125,8 @@ X_FORCEINLINE XVoid XFileInputDataStream::close()
     {
         fclose( m_pkFile );
         m_pkFile = nullptr;
+        m_uiSize = 0;
     }
-}
-
-//------------------------------------------------------------------------------
-X_FORCEINLINE XRet XFileOutputDataStream::seek( XSize offset, eSeekMode mode )
-{
-    if ( m_pkFile )
-    {
-        return ( fseek( m_pkFile, offset, mode ) == 0 ) ? X_SUCCESS : X_ERROR;
-    }
-    
-    return X_ERROR;
-}
-
-//------------------------------------------------------------------------------
-X_FORCEINLINE XSize XFileOutputDataStream::tell() const
-{
-    return m_pkFile ? ftell( m_pkFile ) : 0;
-}
-
-//------------------------------------------------------------------------------
-X_FORCEINLINE XBool XFileOutputDataStream::eof() const
-{
-    return m_pkFile ? ( feof( m_pkFile ) != 0 ) : true;
 }
 
 //------------------------------------------------------------------------------

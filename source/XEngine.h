@@ -44,11 +44,17 @@
 #include "Reflection/XMetaTranslator.h"
 #include "Reflection/XMetaPrimitiveTranslator.h"
 #include "Reflection/XMetaClasstranslator.h"
+#include "Reflection/XMetaPointertranslator.h"
 #include "Reflection/XMetaSTLTranslator.h"
+#include "Reflection/XMetaObject.h"
+#include "Reflection/XMetaObjectSerializer.h"
 
 #include "IO/XDataStream.h"
 
 #include "IO/XFileDataStream.h"
 #include "IO/XMemDataStream.h"
+
+#include "IO/XArchiveXML.h"
+#include "IO/XArchiveJson.h"
 
 #endif // __XENGINE_H__

@@ -32,30 +32,20 @@ X_NS_BEGIN
 
 
 //------------------------------------------------------------------------------
-XMemoryInputDataStream::XMemoryInputDataStream()
-: m_pData( nullptr )
-, m_pPos( nullptr )
-, m_pEnd( nullptr )
+XMemoryInputDataStream::XMemoryInputDataStream( const XVoid* pkData, XSize size )
+: m_pData( (const XChar*)pkData )
+, m_pPos( m_pData )
+, m_pEnd( m_pData + size )
 {
+    m_uiSize = size;
+    assert( m_pData );
+    assert( m_pEnd >= m_pData );
 }
 
 //------------------------------------------------------------------------------
 XMemoryInputDataStream::~XMemoryInputDataStream()
 {
     close();
-}
-
-//------------------------------------------------------------------------------
-XRet XMemoryInputDataStream::open( const XVoid* pData, XSize size )
-{
-    X_RET_VAL_IF( !pData || size == 0, X_ERROR );
-    
-    m_size = size;
-    m_pData = m_pPos = (const XChar*)pData;
-    m_pEnd = m_pData + m_size;
-    assert( m_pEnd >= m_pPos );
-    
-    return X_SUCCESS;
 }
 
 //------------------------------------------------------------------------------
@@ -85,11 +75,11 @@ XSize XMemoryInputDataStream::read( XVoid* pkBuffer, XSize uiNumOfBytesToRead )
 }
 
 //------------------------------------------------------------------------------
-XRet XMemoryInputDataStream::seek( XSize offset, eSeekMode mode )
+XRet XMemoryInputDataStream::seek( XSize offset, XStreamSeekMode mode )
 {
     X_RET_VAL_IF( !m_pData, X_ERROR );
     
-    const XChar* pkStart = ( mode == SET ) ? m_pData : ( mode == CUR ) ? m_pPos : m_pEnd;
+    const XChar* pkStart = ( mode == XStreamSeekMode::SET ) ? m_pData : ( mode == XStreamSeekMode::CUR ) ? m_pPos : m_pEnd;
     const XChar* pkTarget = pkStart + offset;
     if ( pkTarget >= m_pData
         && pkTarget <= m_pEnd )
@@ -101,116 +91,72 @@ XRet XMemoryInputDataStream::seek( XSize offset, eSeekMode mode )
     return X_ERROR;
 }
 
+XSize getCapacity( XSize cur, XSize need )
+{
+    X_RET_VAL_IF( cur >= need, cur );
+    XSize capacity = cur ? ( cur * 2 ) : 32;
+    while ( capacity <= need )
+    {
+        capacity *= 2;
+    }
+    return capacity;
+}
 
 //------------------------------------------------------------------------------
-TMemoryOutputDataStream::TMemoryOutputDataStream()
+XMemoryOutputDataStream::XMemoryOutputDataStream( XSize size )
 : m_pData( nullptr )
-, m_pPos( nullptr )
-, m_pEnd( nullptr )
+, m_uiSize( 0 )
+, m_uiCapacity( size )
 {
 }
 
 //------------------------------------------------------------------------------
-TMemoryOutputDataStream::~TMemoryOutputDataStream()
+XMemoryOutputDataStream::~XMemoryOutputDataStream()
 {
     close();
 }
 
 //------------------------------------------------------------------------------
-XRet TMemoryOutputDataStream::open( XSize size, XBool bDynamic /*= false*/ )
+XSize XMemoryOutputDataStream::write( const XVoid* pkBuffer, XSize uiNumOfBytesToWrite )
 {
-    X_RET_VAL_IF( size == 0 && !bDynamic, X_ERROR );
+    assert( pkBuffer && uiNumOfBytesToWrite );
     
-    m_size = size;
-    
-    if ( m_size )
+    XBool bNeedResize = false;
+    XSize uiNeed = m_uiSize + uiNumOfBytesToWrite;
+    if ( uiNeed > m_uiCapacity )
     {
-        m_pData = X_NEW XChar[m_size];
-        m_pPos = m_pData;
-        m_pEnd = m_pData + m_size;
-    }
-    else
-    {
-        m_pData = m_pPos = m_pEnd = nullptr;
-    }
-    assert( m_pEnd >= m_pPos );
-    
-    m_bDynamic = bDynamic;
-    
-    return X_SUCCESS;
-}
-
-//------------------------------------------------------------------------------
-XSize TMemoryOutputDataStream::write( const XVoid* pkBuffer, XSize uiNumOfBytesToWrite )
-{
-    X_RET_VAL_IF( !m_pData, 0 );
-    
-    XSize uiWritten = uiNumOfBytesToWrite;
-    // we only allow writing within the extents of allocated memory
-    // check for buffer overrun & disallow
-    if ( m_pPos + uiWritten > m_pEnd )
-    {
-        if ( !m_bDynamic )
+        m_uiCapacity = m_uiCapacity ? ( m_uiCapacity * 2 ) : 32;
+        while ( uiNeed > m_uiCapacity )
         {
-            uiWritten = m_pEnd - m_pPos;
+            m_uiCapacity *= 2;
         }
-        else
-        {
-            XSize offset = m_pPos - m_pData;
-            
-            // get new need size.
-            XSize newSize = m_size ? ( m_size * 2 ) : 128;
-            while ( m_pPos + uiWritten > m_pPos + newSize )
-            {
-                newSize *= 2;
-            }
-            // realloc memory.
-            XChar* pNewData = X_NEW XChar[ newSize ];
-            assert( pNewData != nullptr );
-            
-            if ( m_size )
-            {
-                assert( m_pData != nullptr && m_pPos != nullptr && m_pEnd != nullptr );
-                // copy old data to new buff.
-                memcpy( pNewData, m_pData, m_size );
-                // free old buff.
-                X_SAFE_DEL_ARR( m_pData );
-            }
-            
-            // re pos.
-            m_pData = pNewData;
-            m_pPos = m_pData + offset;
-            m_pEnd = m_pData + newSize;
-            
-            m_size = newSize;
-            
-            assert( m_pEnd >= m_pPos );
-            assert( m_pPos + uiWritten <= m_pEnd );
-        }
+        
+        bNeedResize = true;
     }
     
-    X_RET_VAL_IF( uiWritten == 0, X_ERROR );
-    
-    memcpy( m_pPos, pkBuffer, uiWritten );
-    m_pPos += uiWritten;
-    return uiWritten;
-}
-
-//------------------------------------------------------------------------------
-XRet TMemoryOutputDataStream::seek( XSize offset, eSeekMode mode )
-{
-    X_RET_VAL_IF( !m_pData, X_ERROR );
-    
-    XChar* pkStart = ( mode == SET ) ? m_pData : ( mode == CUR ) ? m_pPos : m_pEnd;
-    XChar* pkTarget = pkStart + offset;
-    if ( pkTarget >= m_pData
-        && pkTarget <= m_pEnd )
+    if ( !m_pData
+        || bNeedResize )
     {
-        m_pPos = pkTarget;
-        return X_SUCCESS;
+        XChar* pkData = X_NEW XChar[ m_uiCapacity ];
+        assert( pkData );
+        
+        if ( m_pData
+            && m_uiSize )
+        {
+            // copy old data to new buff.
+            memcpy( pkData, m_pData, m_uiSize );
+            // free old buff.
+            X_SAFE_DEL_ARR( m_pData );
+        }
+        
+        m_pData = pkData;
     }
     
-    return X_ERROR;
+    assert( m_pData );
+    
+    memcpy( m_pData + m_uiSize, pkBuffer, uiNumOfBytesToWrite );
+    m_uiSize += uiNumOfBytesToWrite;
+    return uiNumOfBytesToWrite;
 }
 
 X_NS_END

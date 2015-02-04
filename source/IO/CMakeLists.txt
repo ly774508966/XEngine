@@ -5,7 +5,11 @@ set ( IO_FILES
 	IO/XFileDataStream.cpp
 	IO/XMemDataStream.h
 	IO/XMemDataStream.cpp
-	IO/XSerializer.h
+	IO/XArchive.h
+	IO/XArchiveXML.h
+	IO/XArchiveXML.cpp
+	IO/XArchiveJson.h
+	IO/XArchiveJson.cpp
 )
 
 list( APPEND ALL_FILES ${IO_FILES} )

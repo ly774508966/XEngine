@@ -36,10 +36,11 @@ X_NS_BEGIN
 std::map< std::string, const XMetaClass* > XMetaClass::ms_mapMetaClasses;
 
 //------------------------------------------------------------------------------
-XMetaClass::XMetaClass( const XString& strName, XUInt32 size, TFunMetaClassInit fun_parents, TFunMetaClassInit fun_fields, TFunMetaClassInit fun_methods )
+XMetaClass::XMetaClass( const XString& strName, XUInt32 size, XMetaObjectCreator pkCreator, TFunMetaClassInit fun_parents, TFunMetaClassInit fun_fields, TFunMetaClassInit fun_methods )
 : m_strName( strName )
 , m_uiCrc32( XStringUtil::crc32( strName ) )
 , m_uiSize( size )
+, m_pkObjectCreator( pkCreator )
 , m_pkFunInitFields( fun_fields )
 , m_pkFunInitMethods( fun_methods )
 , m_bFieldsInited( false )

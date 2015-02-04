@@ -44,6 +44,7 @@
 #include <vector>
 #include <set>
 #include <map>
+#include <fstream>
 #include <sstream>
 #include <algorithm>
 #include <codecvt>
@@ -56,8 +57,6 @@
 
 
 X_NS_BEGIN
-
-class XMetaObject;
 
 
 class XMetaEnum;

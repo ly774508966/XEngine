@@ -26,24 +26,29 @@
 **
 ******************************************************************************/
 
-#ifndef __XSERIALIZER_H__
-#define __XSERIALIZER_H__
+#ifndef __XARCHIVE_H__
+#define __XARCHIVE_H__
 
 #include "Base/XPreDef.h"
 #include "Base/XSmartPointer.h"
 
 X_NS_BEGIN
 
-class X_API XInputSerializer
+class XInputDataStream;
+typedef XVoid* XArchiveNodePtr;
+typedef XVoid* XArchiveAttributePtr;
+class X_API XInputArchive
 	: public XRefObject
 {
-	X_DECLARE_NO_COPY_CLASS( XInputSerializer );
 public:
-	virtual ~XInputSerializer() {}
+	virtual ~XInputArchive() {}
 
 	virtual XUInt32				getVersion() const = 0;
 
 	virtual const XString&		getTypeName() const = 0;
+    
+    virtual XRet                load( XInputDataStream* pkStream ) = 0;
+    virtual XRet                load( const XVoid* pkData, XSize size ) = 0;
 
 	virtual XRet				read( const XString& name, XBool& v ) = 0;
 	virtual XRet				read( const XString& name, XFloat& v ) = 0;
@@ -65,21 +70,25 @@ public:
 	virtual XRet				read( const XString& name, XWString& v ) = 0;
 
 	virtual XRet				readSectionBegin( const XString& name ) = 0;
-	virtual XRet				readSectionEnd( const XString& name ) = 0;
+	virtual XRet				readSectionEnd() = 0;
 };
-X_DefSmartPointer( XInputSerializer );
+X_DefSmartPointer( XInputArchive );
 
-class X_API XOutputSerializer
+class X_API XOutputArchive
 	: public XRefObject
 {
-	X_DECLARE_NO_COPY_CLASS( XOutputSerializer );
 public:
-	virtual ~XOutputSerializer() {}
+	virtual ~XOutputArchive() {}
 
 	virtual XUInt32				getVersion() const = 0;
 
 	virtual const XString&		getTypeName() const = 0;
-
+    
+    // save archive to a file.
+    virtual XRet                save( const XString& name ) = 0;
+    // save archive to a stream.
+    virtual XRet                save( std::ostream& s ) = 0;
+    
 	virtual XRet				write( const XString& name, XBool v ) = 0;
 	virtual XRet				write( const XString& name, XFloat v ) = 0;
 	virtual XRet				write( const XString& name, XDouble v ) = 0;
@@ -99,11 +108,12 @@ public:
 	virtual XRet				write( const XString& name, const XString& v ) = 0;
 	virtual XRet				write( const XString& name, const XWString& v ) = 0;
 
-	virtual XRet				readSectionBegin( const XString& name ) = 0;
-	virtual XRet				readSectionEnd( const XString& name ) = 0;
+	virtual XRet				writeSectionBegin( const XString& name ) = 0;
+	virtual XRet				writeSectionEnd() = 0;
 };
-X_DefSmartPointer( XOutputSerializer );
+X_DefSmartPointer( XOutputArchive );
+
 
 X_NS_END
 
-#endif // __XSERIALIZER_H__
+#endif // __XARCHIVE_H__

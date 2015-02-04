@@ -31,8 +31,17 @@
 
 X_NS_BEGIN
 
+#include "Base/XPreDef.h"
+
 template < typename T >
 class XMetaTranslatorHelper;
+
+class XMetaTranslator;
+template < typename T >
+X_FORCEINLINE const XMetaTranslator* getMetaTranslator()
+{
+    return XMetaTranslatorHelper< typename std::remove_cv<T>::type >::getTranslator();
+}
 
 
 //------------------------------------------------------------------------------
@@ -46,7 +55,6 @@ enum class XMetaTranslatorType
 	UNKNOWN
 };
 
-class XMetaFieldPointer;
 class X_API XMetaTranslator
 {
 public:
@@ -54,9 +62,29 @@ public:
 	virtual ~XMetaTranslator() {}
     
     virtual XMetaTranslatorType         getTranslatorType() const = 0;
+    virtual XSize                       getMemSize() const = 0;
+    virtual XVoid*                      newObj() const = 0;
+    virtual XVoid                       delObj( XVoid* pAddress ) const = 0;
+    virtual XVoid                       construct( XVoid* pAddress ) const = 0;
+    virtual XVoid                       destruct( XVoid* pAddress ) const = 0;
+    virtual XBool                       equals( const XVoid* pA, const XVoid* pB ) const = 0;
+    virtual XVoid                       assign( XVoid* pDest, const XVoid* pSrc, XUInt32 uiFlag ) const = 0;
     
-    virtual XBool                       equals( const XMetaFieldPointer& kSrc, const XMetaFieldPointer& kDest ) const = 0;
-    virtual XVoid                       copy( XMetaFieldPointer& kDest, const XMetaFieldPointer& kSrc, XUInt32 uiFlag ) const = 0;
+public:
+    template < typename T >
+    static XSize                        defaultGetMemSize() { return sizeof(T); }
+    
+    template < typename T >
+    static XVoid*                       defaultNewObj() { return X_NEW T; }
+    
+    template < typename T >
+    static XVoid                        defaultDelObj( XVoid* pAddress ) { T* p = (T*)pAddress; X_SAFE_DEL(p); }
+    
+    template < typename T >
+    static XVoid                        defaultConstruct( XVoid* pAddress ) { assert( pAddress ); X_NEW( pAddress ) T; }
+    
+    template < typename T >
+    static XVoid                        defaultDestruct( XVoid* pAddress ) { assert( pAddress ); ( (T*)pAddress )->~T(); }
 };
 
 
@@ -115,49 +143,45 @@ public:
 
 
 //------------------------------------------------------------------------------
-class X_API XMetaContainerTranslator
-: public XMetaTranslator
-{
-public:
-    virtual XUInt32                     getLength( const XMetaFieldPointer& kPointer ) const = 0;
-    virtual XVoid                       clear( XMetaFieldPointer& kPointer ) = 0;
-};
-
-
-//------------------------------------------------------------------------------
 class X_API XMetaSequenceTranslator
-: public XMetaContainerTranslator
+: public XMetaTranslator
 {
 public:
     
 	virtual XMetaTranslatorType         getTranslatorType() const override { return XMetaTranslatorType::SEQUENTIAL_CONTAINER; }
     
     virtual const XMetaTranslator*      getItemTranslator() const = 0;
-    
-    virtual XVoid                       resize( XMetaFieldPointer& kPointer, XUInt32 uiLength ) = 0;
-    virtual XVoid                       setItem( XMetaFieldPointer& kPointer, XUInt32 uiIdx, const XMetaFieldPointer& kValue ) = 0;
-    virtual XMetaFieldPointer           getItem( const XMetaFieldPointer& kPointer, XUInt32 uiIdx ) = 0;
-    virtual XVoid                       insert( XMetaFieldPointer& kPointer, XUInt32 uiIdx, const XMetaFieldPointer& kValue ) = 0;
-    virtual XVoid                       remove( XMetaFieldPointer& kPointer, XUInt32 uiIdx ) = 0;
-    virtual XVoid                       moveUp( XMetaFieldPointer& kPointer, XUInt32 uiIdx ) = 0;
-    virtual XVoid                       moveDown( XMetaFieldPointer& kPointer, XUInt32 uiIdx ) = 0;
+
+    virtual XSize                       getSize( const XVoid* pAddress ) const = 0;
+    virtual XVoid                       clear( XVoid* pAddress ) const = 0;
+    virtual XVoid                       resize( XVoid* pAddress, XSize uiSize ) const = 0;
+    virtual XVoid                       setItem( XVoid* pAddress, XSize uiIdx, const XVoid* pValue ) const = 0;
+    virtual const XVoid*                getItem( const XVoid* pAddress, XSize uiIdx ) const = 0;
+    virtual XVoid                       insert( XVoid* pAddress, XSize uiIdx, const XVoid* pValue ) const = 0;
+    virtual XVoid                       remove( XVoid* pAddress, XSize uiIdx ) const = 0;
+    virtual XVoid                       moveUp( XVoid* pAddress, XSize uiIdx ) const = 0;
+    virtual XVoid                       moveDown( XVoid* pAddress, XSize uiIdx ) const = 0;
 };
 
 
 //------------------------------------------------------------------------------
 class X_API XMetaAssociationTranslator
-: public XMetaContainerTranslator
+: public XMetaTranslator
 {
 public:
     
 	virtual XMetaTranslatorType         getTranslatorType() const override { return XMetaTranslatorType::ASSOCIATIVE_CONTAINER; }
-    
+
+    virtual XSize                       getSize( const XVoid* pAddress ) const = 0;
+    virtual XVoid                       clear( XVoid* pAddress ) const = 0;
+
     virtual const XMetaTranslator*      getKeyTranslator() const = 0;
     virtual const XMetaTranslator*      getValueTranslator() const = 0;
-    
-    virtual XVoid                       setItem( XMetaFieldPointer& kPointer, const XMetaFieldPointer& kKey, const XMetaFieldPointer& kValue ) = 0;
-    virtual XMetaFieldPointer           getItem( XMetaFieldPointer& kPointer, const XMetaFieldPointer& kKey ) = 0;
-    virtual XVoid                       remove( XMetaFieldPointer& kPointer, const XMetaFieldPointer& kKey ) = 0;
+
+    virtual XVoid                       getAllItems( const XVoid* pAddress, std::vector<const XVoid*>& allKeys, std::vector<const XVoid*>& allItems ) const = 0;
+    virtual XVoid                       setItem( XVoid* pAddress, const XVoid* pKey, const XVoid* pValue ) const = 0;
+    virtual const XVoid*                getItem( const XVoid* pAddress, const XVoid* pKey ) const = 0;
+    virtual XVoid                       remove( XVoid* pAddress, const XVoid* pKey ) const = 0;
 };
 
 X_NS_END

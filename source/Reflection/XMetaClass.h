@@ -39,7 +39,9 @@ X_NS_BEGIN
 template < typename T >
 class XMetaClassHelper;
 
+class XMetaObject;
 typedef XVoid (*TFunMetaClassInit)( XMetaClass& );
+typedef XMetaObject* (*XMetaObjectCreator)();
 
 #define RET_BASE_CLASS_ALREADY_EXIST    -1
 
@@ -51,6 +53,8 @@ protected:
 	XString						m_strName;
 	XUInt32						m_uiCrc32;
     XUInt32                     m_uiSize;
+    
+    XMetaObjectCreator          m_pkObjectCreator;
     
     TFunMetaClassInit           m_pkFunInitFields;
     TFunMetaClassInit           m_pkFunInitMethods;
@@ -69,13 +73,15 @@ private:
     static std::map< std::string, const XMetaClass* >  ms_mapMetaClasses;
     
 public:
-    XMetaClass( const XString& strName, XUInt32 size, TFunMetaClassInit fun_parents, TFunMetaClassInit fun_fields, TFunMetaClassInit fun_methods );
+    XMetaClass( const XString& strName, XUInt32 size, XMetaObjectCreator pkCreator, TFunMetaClassInit fun_parents, TFunMetaClassInit fun_fields, TFunMetaClassInit fun_methods );
 
 	const XString&				getName() const { return m_strName; }
 	XUInt32						getCrc32() const { return m_uiCrc32;  }
     XUInt32                     getSize() const { return m_uiSize; }
     
     XRet                        addBaseClass( const XMetaClass* pkBase );
+    
+    XMetaObject*                createObject() const { assert( m_pkObjectCreator ); return m_pkObjectCreator(); }
     
     template < typename T >
     XBool                       isKindOf() const;
@@ -179,13 +185,14 @@ public: \
     virtual const XMetaClass* getMetaClass() const override { return &ms_kMetaClass; } \
     static const XMetaClass ms_kMetaClass;    \
     static XRet ms_registerRet;   \
+    static XMetaObject* creator() { return X_NEW class_name; }  \
     static XVoid buildMetaParents( XMetaClass& kMetaClass );    \
     static XVoid buildMetaFields( XMetaClass& kMetaClass ); \
     static XVoid buildMetaMethods( XMetaClass& kMetaClass );    \
 
 
 #define X_IMPLEMENT_META_CLASS( class_name, b, f, m ) \
-    const XMetaClass class_name::ms_kMetaClass( #class_name, sizeof( class_name ), &class_name::buildMetaParents, &class_name::buildMetaFields, &class_name::buildMetaMethods );   \
+    const XMetaClass class_name::ms_kMetaClass( #class_name, sizeof( class_name ), &class_name::creator, &class_name::buildMetaParents, &class_name::buildMetaFields, &class_name::buildMetaMethods );   \
     XRet class_name::ms_registerRet = XMetaSystem::getIns().registerMetaClass( &class_name::ms_kMetaClass );  \
     XVoid class_name::buildMetaParents( XMetaClass& kMetaClass ) { b }  \
     XVoid class_name::buildMetaFields( XMetaClass& kMetaClass ) { f }  \

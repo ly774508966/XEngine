@@ -31,11 +31,31 @@
 
 X_NS_BEGIN
 
-
 //------------------------------------------------------------------------------
-XFileInputDataStream::XFileInputDataStream()
-: m_pkFile( nullptr )
+XFileInputDataStream::XFileInputDataStream( const XString& strName )
+: XFileInputDataStream( strName.c_str() )
 {
+}
+
+
+XFileInputDataStream::XFileInputDataStream( const XChar* pName )
+{
+    X_RET_IF( !pName );
+    
+#if X_OS_WIN
+    if (_wfopen_s(&m_pkFile, XStringUtil::utf8ToWide(pName,0).c_str(), L"rb"))
+    {
+        return;
+    }
+#else
+    m_pkFile = fopen( pName, "rb" );
+#endif
+    
+    X_RET_IF( !m_pkFile );
+    
+    fseek( m_pkFile, 0, SEEK_END );
+    m_uiSize = ftell( m_pkFile );
+    fseek( m_pkFile, 0, SEEK_SET );
 }
 
 //------------------------------------------------------------------------------
@@ -45,70 +65,22 @@ XFileInputDataStream::~XFileInputDataStream()
 }
 
 //------------------------------------------------------------------------------
-XRet XFileInputDataStream::open( const XString& strName )
-{
-    X_RET_VAL_IF( strName.empty(), X_ERROR );
-    
-    FILE* pkFile = nullptr;
-#if X_OS_WIN
-	if (_wfopen_s(&pkFile, XStringUtil::utf8ToWide(strName).c_str(), L"rb"))
-	{
-		return X_ERROR;
-	}
-#else
-    pkFile = fopen( strName.c_str(), "rb" );
-#endif
-    return open( pkFile );
-}
-
-//------------------------------------------------------------------------------
-XRet XFileInputDataStream::open( FILE* pkFile )
-{
-    X_RET_VAL_IF( !pkFile, X_ERROR );
-    
-    m_pkFile = pkFile;
-    
-    fseek( m_pkFile, 0, SEEK_END );
-    m_size = ftell( m_pkFile );
-    fseek( m_pkFile, 0, SEEK_SET );
-    
-    return X_SUCCESS;
-}
-
-//------------------------------------------------------------------------------
-XFileOutputDataStream::XFileOutputDataStream()
+XFileOutputDataStream::XFileOutputDataStream( const XString& strName, XBool bAppend )
 : m_pkFile( nullptr )
 {
+    X_RET_IF( strName.empty() );
+    
+#if X_OS_WIN
+    _wfopen_s(&m_pkFile, XStringUtil::utf8ToWide(strName).c_str(), bAppend ? L"ab" : L"wb");
+#else
+    m_pkFile = fopen( strName.c_str(), bAppend ? "ab" : "wb" );
+#endif
 }
 
 //------------------------------------------------------------------------------
 XFileOutputDataStream::~XFileOutputDataStream()
 {
     close();
-}
-
-//------------------------------------------------------------------------------
-XRet XFileOutputDataStream::open( const XString& strName, XBool bAppend /*= false*/ )
-{
-    X_RET_VAL_IF( strName.empty(), X_ERROR );
-    
-    FILE* pkFile = nullptr;
-#if X_OS_WIN
-	_wfopen_s(&pkFile, XStringUtil::utf8ToWide(strName).c_str(), bAppend ? L"ab" : L"wb");
-#else
-    pkFile = fopen( strName.c_str(), bAppend ? "ab" : "wb" );
-#endif
-    return open( pkFile );
-}
-
-//------------------------------------------------------------------------------
-XRet XFileOutputDataStream::open( FILE* pkFile )
-{
-    X_RET_VAL_IF( !pkFile, X_ERROR );
-    
-    m_pkFile = pkFile;
-    
-    return X_SUCCESS;
 }
 
 X_NS_END

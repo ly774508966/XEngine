@@ -41,6 +41,11 @@ public:
     
 	static XString					format( const XChar* format, ... );
     
+    template< typename T >
+    static XString                  toString( const T& v );
+    template< typename T >
+    static XRet                     fromString( const XString& str, T& v );
+    
 	static XVoid					trim( XString& str, XBool left = true, XBool right = true );
 	static XVoid 					splitString( XArrString& strArray, const XString& str, const XString& strSplit );
 	static XString                  toString( const XArrString& arr, const XString& strMid = ";" );
@@ -72,6 +77,78 @@ X_FORCEINLINE XString XStringUtil::toLower( const XString& str )
     XString strResult = str;
     std::transform( str.begin(), str.end(), strResult.begin(), ::tolower );
     return strResult;
+}
+
+//------------------------------------------------------------------------------
+template< typename T >
+X_FORCEINLINE XString XStringUtil::toString( const T& v )
+{
+    std::stringstream ss;
+    ss << v;
+    return ss.str();
+}
+
+//------------------------------------------------------------------------------
+template<>
+X_FORCEINLINE XString XStringUtil::toString<XString>( const XString& v )
+{
+    return v;
+}
+
+//------------------------------------------------------------------------------
+template<>
+X_FORCEINLINE XString XStringUtil::toString<XWString>( const XWString& v )
+{
+    return XStringUtil::wideToUTF8( v );
+}
+
+//------------------------------------------------------------------------------
+template<>
+X_FORCEINLINE XString XStringUtil::toString<XBool>( const XBool& v )
+{
+    return v ? "true" : "false";
+}
+
+//------------------------------------------------------------------------------
+template< typename T >
+X_FORCEINLINE XRet XStringUtil::fromString( const XString& str, T& v )
+{
+    std::stringstream ss( str );
+    ss >> v;
+    return X_SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+template<>
+X_FORCEINLINE XRet XStringUtil::fromString<XString>( const XString& str, XString& v )
+{
+    v = str;
+    return X_SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+template<>
+X_FORCEINLINE XRet XStringUtil::fromString<XWString>( const XString& str, XWString& v )
+{
+    v = XStringUtil::utf8ToWide( str );
+    return X_SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+template<>
+X_FORCEINLINE XRet XStringUtil::fromString<XBool>( const XString& str, XBool& v )
+{
+    if ( str == "true" )
+    {
+        v = true;
+        return X_SUCCESS;
+    }
+    else if ( str == "false" )
+    {
+        v = false;
+        return X_SUCCESS;
+    }
+    return X_ERROR;
 }
 
 // ------------------------------------------------------------------------

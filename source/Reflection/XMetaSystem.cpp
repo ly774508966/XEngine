@@ -48,7 +48,7 @@ XRet XMetaSystem::registerMetaClass( const XMetaClass* pkMetaClass )
 }
 
 //------------------------------------------------------------------------------
-X_FORCEINLINE const XMetaClass* XMetaSystem::getMetaClass( const XString& strName ) const
+const XMetaClass* XMetaSystem::getMetaClass( const XString& strName ) const
 {
 	return getMetaClass( XStringUtil::crc32( strName ) );
 }

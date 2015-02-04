@@ -1,5 +1,7 @@
 set ( REFLECTION_FILES
 	Reflection/XMetaObject.h
+	Reflection/XMetaObjectSerializer.h
+	Reflection/XMetaObjectSerializer.cpp
 	Reflection/XMetaClass.h
 	Reflection/XMetaClass.cpp
 	Reflection/XMetaEnum.h
@@ -11,6 +13,7 @@ set ( REFLECTION_FILES
 	Reflection/XMetaTranslator.h
 	Reflection/XMetaPrimitiveTranslator.h
 	Reflection/XMetaClassTranslator.h
+	Reflection/XMetaPointerTranslator.h
 	Reflection/XMetaSTLTranslator.h
 	Reflection/XMetaSystem.h
 	Reflection/XMetaSystem.cpp

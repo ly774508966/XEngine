@@ -41,7 +41,7 @@ enum eAccessMode
     READ_WRITE = READ | WRITE,
 };
 
-enum eSeekMode
+enum class XStreamSeekMode
 {
     //! value from stdio.h
     //#define SEEK_CUR    1
@@ -52,48 +52,30 @@ enum eSeekMode
     END = 2,
 };
 
-class X_API XDataStream
+class X_API XInputDataStream
 : public XRefObject
 {
 protected:
-    XSize                       m_size;
+    XSize                       m_uiSize;
     
-protected:
-    
-    XDataStream();
-    
+    XInputDataStream()
+    : m_uiSize( 0 )
+    {
+    }
 public:
     
-    XSize                       getSize() const { return m_size; }
-    
-    /** Close the stream; this makes further operations invalid. */
-    virtual XVoid				close() = 0;
-    
-    /** Skip a defined number of bytes. This can also be a negative value, in which case
-     the file pointer rewinds a defined number of bytes. */
-    virtual XRet				skip( XSize count );
-    
-    /** Repositions the read point to a specified byte. */
-    virtual XRet				seek( XSize pos );
-    virtual XRet				seek( XSize offset, eSeekMode mode ) = 0;
-    
-    /** Returns the current byte offset from beginning */
-    virtual XSize				tell() const = 0;
-    
-    /** Returns true if the stream has reached the end. */
-    virtual XBool				eof() const = 0;
-};
-
-
-class X_API XInputDataStream
-: public XDataStream
-{
-public:
+    XSize                       getSize() const { return m_uiSize; }
     
     XString                     getLine( XBool trimAfter = true );
     
     /** Returns a string containing the entire stream. */
-    XString                     getAsString();
+    virtual XString             getAsString();
+    
+    virtual const XByte*        getData( XBool& bNeedDel, XSize* pSize = nullptr ) const;
+    
+    /** Skip a defined number of bytes. This can also be a negative value, in which case
+     the file pointer rewinds a defined number of bytes. */
+    XRet                        skip( XSize n );
     
     //! Streaming operators
     template<typename T>
@@ -101,33 +83,50 @@ public:
     
     /** Read the requisite number of bytes from the stream, stopping at the end of the file. */
     virtual XSize               read( XVoid* pkBuffer, XSize uiNumOfBytesToRead ) = 0;
-    XRet     					read2( XVoid* pkBuffer, XSize uiNumOfBytesToRead, XSize* uiNumOfBytesRead = nullptr );
+    
+    
+    /** Close the stream; this makes further operations invalid. */
+    virtual XVoid				close() = 0;
+    
+    
+    /** Repositions the read point to a specified byte. */
+    virtual XRet				seek( XSize offset, XStreamSeekMode mode = XStreamSeekMode::CUR ) = 0;
+    
+    
+    /** Returns the current byte offset from beginning */
+    virtual XSize				tell() const = 0;
+    
+    /** Returns true if the stream has reached the end. */
+    virtual XBool				eof() const = 0;
 };
+X_DefSmartPointer( XInputDataStream );
 
 
+//------------------------------------------------------------------------------
 class X_API XOutputDataStream
-: public XDataStream
+: public XRefObject
 {
 public:
+
+    /** Close the stream; this makes further operations invalid. */
+    virtual XVoid				close() = 0;
     
+    // Flushes this output stream and forces any buffered output bytes to be written out.
     virtual XVoid               flush() = 0;
     
     /** Write the requisite number of bytes to the stream. */
     virtual XSize               write( const XVoid* pkBuffer, XSize uiNumOfBytesToWrite ) = 0;
-    XRet						write2( const XVoid* pkBuffer, XSize uiNumOfBytesToWrite, XSize* uiNumOfBytesWritten = nullptr );
+    
+    //! Streaming operators
+    template<typename T>
+    XOutputDataStream&			operator << ( const T& val );
 };
-
-
-//------------------------------------------------------------------------------
-X_FORCEINLINE XRet XDataStream::skip( XSize count )
-{
-    return seek( count, CUR );
-}
+X_DefSmartPointer( XOutputDataStream );
 
 //------------------------------------------------------------------------------
-X_FORCEINLINE XRet XDataStream::seek( XSize pos )
+X_FORCEINLINE XRet XInputDataStream::skip( XSize n )
 {
-    return seek( pos, SET );
+    return seek( n, XStreamSeekMode::CUR );
 }
 
 //------------------------------------------------------------------------------
@@ -138,29 +137,13 @@ X_FORCEINLINE XInputDataStream& XInputDataStream::operator>>( T& val )
     return *this;
 }
 
-//------------------------------------------------------------------------------
-X_FORCEINLINE XRet XInputDataStream::read2( XVoid* pkBuffer, XSize uiNumOfBytesToRead, XSize* uiNumOfBytesRead /*= nullptr */ )
-{
-    XSize uiBytes = read( pkBuffer, uiNumOfBytesToRead );
-    if ( uiNumOfBytesRead )
-    {
-        *uiNumOfBytesRead = uiBytes;
-    }
-    
-    return uiBytes == uiNumOfBytesToRead ? X_SUCCESS : X_ERROR;
-}
-
 
 //------------------------------------------------------------------------------
-X_FORCEINLINE XRet XOutputDataStream::write2( const XVoid* pkBuffer, XSize uiNumOfBytesToWrite, XSize* uiNumOfBytesWritten /*= nullptr*/ )
+template<typename T>
+X_FORCEINLINE XOutputDataStream& XOutputDataStream::operator<<( const T& val )
 {
-    XSize uiBytes = write( pkBuffer, uiNumOfBytesToWrite );
-    if ( uiNumOfBytesWritten )
-    {
-        *uiNumOfBytesWritten = uiBytes;
-    }
-    
-    return uiBytes == uiNumOfBytesToWrite ? X_SUCCESS : X_ERROR;
+    write( (const XVoid*)&val, sizeof(T) );
+    return *this;
 }
 
 X_NS_END

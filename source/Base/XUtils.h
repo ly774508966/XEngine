@@ -56,8 +56,8 @@
 
 // ---------------------------------------------------------------------------
 #define X_NEW new
-#define X_SAFE_DEL( ptr )       if ( ptr ) { delete (ptr); (ptr) = 0; }
-#define X_SAFE_DEL_ARR( ptr )   if ( ptr ) { delete [] (ptr); (ptr) = 0; }
+#define X_SAFE_DEL( ptr )       if ( ptr ) { delete (ptr); (ptr) = nullptr; }
+#define X_SAFE_DEL_ARR( ptr )   if ( ptr ) { delete [] (ptr); (ptr) = nullptr; }
 
 
 
@@ -89,6 +89,7 @@ struct XFourCC
 typedef XInt32  XRet;
 #define X_SUCCESS    0
 #define X_ERROR     -1
+#define X_IS_SUCCESS( ret ) ( ret == X_SUCCESS )
 
 template < class T, class F >
 X_FORCEINLINE XUInt32 getOffset( F T::* field )

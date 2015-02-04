@@ -58,6 +58,7 @@ typedef uint64_t		XUInt64;
 typedef intptr_t		XIntPtr;
 typedef uintptr_t		XUIntPtr;
 
+typedef char            XByte;
 typedef size_t			XSize;
 
 typedef std::string		XString;

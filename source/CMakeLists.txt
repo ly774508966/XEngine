@@ -1,37 +1,32 @@
-cmake_minimum_required(VERSION 2.8)
+CMAKE_MINIMUM_REQUIRED( VERSION 2.8 )
 PROJECT( XEngine )
 
-include_directories( ${PROJECT_SOURCE_DIR} )
+INCLUDE_DIRECTORIES( ${PROJECT_SOURCE_DIR} )
 
-set ( ALL_FILES XEngine.h )
+SET ( ALL_FILES XEngine.h )
 
-SOURCE_GROUP("" FILES
+SOURCE_GROUP( "" FILES
     XEngine.h
 )
 
-include( Base/CMakeLists.txt )
-include( Reflection/CMakeLists.txt )
-include( IO/CMakeLists.txt )
-include( Math/CMakeLists.txt )
+INCLUDE( Base/CMakeLists.txt )
+INCLUDE( Reflection/CMakeLists.txt )
+INCLUDE( IO/CMakeLists.txt )
+INCLUDE( Math/CMakeLists.txt )
+
+INCLUDE_DIRECTORIES( ${PROJECT_SOURCE_DIR}/ThirdParty )
+
+IF ( APPLE )
+	MESSAGE( "Setting up Xcode for C++11 with libc++." )
+	SET( CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++0x" )
+	SET( CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++" )
+ENDIF()
 
 
-if (APPLE)
-	message("Setting up Xcode for C++11 with libc++.")
-	set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++0x")
-	SET(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++")
-endif()
+ADD_LIBRARY( XEngine SHARED ${ALL_FILES} )
 
+ADD_LIBRARY( XEngine_Static STATIC ${ALL_FILES} )
 
-ADD_LIBRARY( XEngine
-		SHARED
-		${ALL_FILES}
-)
-
-ADD_LIBRARY( XEngine_Static
-		STATIC
-		${ALL_FILES}
-)
-
-SET_TARGET_PROPERTIES(XEngine PROPERTIES CLEAN_DIRECT_OUTPUT 1)
-SET_TARGET_PROPERTIES(XEngine_Static PROPERTIES OUTPUT_NAME "XEngine")
-SET_TARGET_PROPERTIES(XEngine_Static PROPERTIES CLEAN_DIRECT_OUTPUT 1)
+SET_TARGET_PROPERTIES( XEngine PROPERTIES CLEAN_DIRECT_OUTPUT 1 )
+SET_TARGET_PROPERTIES( XEngine_Static PROPERTIES OUTPUT_NAME "XEngine" )
+SET_TARGET_PROPERTIES( XEngine_Static PROPERTIES CLEAN_DIRECT_OUTPUT 1 )

@@ -32,13 +32,6 @@
 X_NS_BEGIN
 
 //------------------------------------------------------------------------------
-XDataStream::XDataStream()
-: m_size( 0 )
-{
-    
-}
-
-//------------------------------------------------------------------------------
 XString XInputDataStream::getLine( XBool trimAfter /*= true */ )
 {
     XChar tmpBuf[128];
@@ -86,17 +79,42 @@ XString XInputDataStream::getLine( XBool trimAfter /*= true */ )
 //------------------------------------------------------------------------------
 XString XInputDataStream::getAsString()
 {
+    XSize curPos = tell();
     XString strResult;
     XSize size = getSize();
-    XChar* pkBuffer = X_NEW XChar[size+1];
+    XByte* pkBuffer = X_NEW XByte[size+1];
     
     seek( 0 );
-    read( (XVoid*)pkBuffer, size );
+    size = read( (XVoid*)pkBuffer, size );
     pkBuffer[size] = '\0';
     strResult.append( pkBuffer, size );
     
     X_SAFE_DEL_ARR( pkBuffer );
+    
+    // restore pos.
+    seek( curPos, XStreamSeekMode::SET );
+    
     return strResult;
+}
+
+//------------------------------------------------------------------------------
+const XByte* XInputDataStream::getData( XBool& bNeedDel, XSize* pSize ) const
+{
+    XSize size = getSize();
+    XByte* pData = X_NEW XByte[ size ];
+    
+    XSize curPos = tell();
+    
+    XInputDataStream* pkDS = (const_cast<XInputDataStream*>(this));
+    pkDS->seek( 0 );
+    size = pkDS->read( (XVoid*)pData, size );
+    
+    // restore pos.
+    pkDS->seek( curPos, XStreamSeekMode::SET );
+    
+    bNeedDel = true;
+    if ( pSize ) *pSize = size;
+    return pData;
 }
 
 X_NS_END
