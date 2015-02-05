@@ -38,8 +38,26 @@
 #include <rapidjson/reader.h>
 #include <rapidjson/PrettyWriter.h>
 #include <rapidjson/stringbuffer.h>
+#include "rapidjson/error/en.h"
 
 X_NS_BEGIN
+
+typedef std::vector< rapidjson::Value* > XVecJsonNodeStack;
+
+rapidjson::Value* getJsonValue( XArchiveNodePtr stack, const std::string& name )
+{
+    X_RET_VAL_IF( !stack, nullptr );
+    XVecJsonNodeStack* pkCurStack = (XVecJsonNodeStack*)stack;
+    assert( pkCurStack );
+    X_RET_VAL_IF( pkCurStack->empty(), nullptr );
+    rapidjson::Value* pkCurValue = pkCurStack->back();
+    assert( pkCurValue );
+    rapidjson::Value::MemberIterator iter = pkCurValue->FindMember( name.c_str() );
+    X_RET_VAL_IF( iter == pkCurValue->MemberEnd(), nullptr );
+    return &iter->value;
+}
+
+
 //------------------------------------------------------------------------------
 XInputArchiveJson::XInputArchiveJson()
 : m_pkRootNode( nullptr )
@@ -51,20 +69,21 @@ XInputArchiveJson::XInputArchiveJson()
 //------------------------------------------------------------------------------
 XInputArchiveJson::~XInputArchiveJson()
 {
+    rapidjson::Document* pkDocument = (rapidjson::Document*)m_pkRootNode;
+    X_SAFE_DEL( pkDocument );
+    m_pkRootNode = nullptr;
+    
+    XVecJsonNodeStack* pkStack = (XVecJsonNodeStack*)m_pkCurNode;
+    X_SAFE_DEL( pkStack );
+    m_pkCurNode = nullptr;
 }
 
 XRet XInputArchiveJson::load( XInputDataStream* pkStream )
 {
     assert( pkStream );
-    XBool bNeedDel = false;
-    XSize size = 0;
-    const XByte* pData = pkStream->getData( bNeedDel, &size );
-    XRet ret = load( pData, size );
-    if ( bNeedDel )
-    {
-        X_SAFE_DEL_ARR( pData );
-    }
-    return ret;
+    XString str = pkStream->getAsString();
+    X_RET_VAL_IF( str.empty(), X_ERROR );
+    return load( (const XVoid*)str.c_str(), str.size() );
 }
 
 //------------------------------------------------------------------------------
@@ -72,134 +91,192 @@ XRet XInputArchiveJson::load( const XVoid* pkData, XSize size )
 {
     assert( pkData && size );
     
+    rapidjson::Document* pkDocument = X_NEW rapidjson::Document;
+    assert( pkDocument );
+    pkDocument->Parse( (const XChar*)pkData );
+    if ( pkDocument->HasParseError() )
+    {
+        X_LOG_ERROR( "failed to parse json : " << GetParseError_En(pkDocument->GetParseError())<< " pos : " << pkDocument->GetErrorOffset() );
+        X_SAFE_DEL( pkDocument );
+        return X_ERROR;
+    }
+    
+    m_pkRootNode = (XArchiveNodePtr)pkDocument;
+    
+    m_pkCurNode = (XArchiveNodePtr)( X_NEW XVecJsonNodeStack );
+    ((XVecJsonNodeStack*)m_pkCurNode)->push_back( pkDocument );
+    
     return X_SUCCESS;
 }
 
 //------------------------------------------------------------------------------
 XRet XInputArchiveJson::read( const XString& name, XBool& v )
 {
-    XString str;
-    X_RET_VAL_IF( !X_IS_SUCCESS( read( name, str ) ), X_ERROR );
-    return XStringUtil::fromString( str, v );
+    rapidjson::Value* pkValue = getJsonValue( m_pkCurNode, name );
+    X_RET_VAL_IF( !pkValue || !pkValue->IsBool(), X_ERROR );
+    v = pkValue->GetBool();
+    return X_SUCCESS;
+
 }
 
 //------------------------------------------------------------------------------
 XRet XInputArchiveJson::read( const XString& name, XFloat& v )
 {
-    XString str;
-    X_RET_VAL_IF( !X_IS_SUCCESS( read( name, str ) ), X_ERROR );
-    return XStringUtil::fromString( str, v );
+    rapidjson::Value* pkValue = getJsonValue( m_pkCurNode, name );
+    X_RET_VAL_IF( !pkValue || !pkValue->IsDouble(), X_ERROR );
+    v = (XFloat)pkValue->GetDouble();
+    return X_SUCCESS;
 }
 
 //------------------------------------------------------------------------------
 XRet XInputArchiveJson::read( const XString& name, XDouble& v )
 {
-    XString str;
-    X_RET_VAL_IF( !X_IS_SUCCESS( read( name, str ) ), X_ERROR );
-    return XStringUtil::fromString( str, v );
+    rapidjson::Value* pkValue = getJsonValue( m_pkCurNode, name );
+    X_RET_VAL_IF( !pkValue || !pkValue->IsDouble(), X_ERROR );
+    v = pkValue->GetDouble();
+    return X_SUCCESS;
 }
 
 //------------------------------------------------------------------------------
 XRet XInputArchiveJson::read( const XString& name, XLong& v )
 {
-    XString str;
-    X_RET_VAL_IF( !X_IS_SUCCESS( read( name, str ) ), X_ERROR );
-    return XStringUtil::fromString( str, v );
+    rapidjson::Value* pkValue = getJsonValue( m_pkCurNode, name );
+    X_RET_VAL_IF( !pkValue || !pkValue->IsInt(), X_ERROR );
+    v = (XLong)pkValue->GetInt();
+    return X_SUCCESS;
 }
 
 //------------------------------------------------------------------------------
 XRet XInputArchiveJson::read( const XString& name, XULong& v )
 {
-    XString str;
-    X_RET_VAL_IF( !X_IS_SUCCESS( read( name, str ) ), X_ERROR );
-    return XStringUtil::fromString( str, v );
+    rapidjson::Value* pkValue = getJsonValue( m_pkCurNode, name );
+    X_RET_VAL_IF( !pkValue || !pkValue->IsUint(), X_ERROR );
+    v = (XULong)pkValue->GetUint();
+    return X_SUCCESS;
 }
 
 //------------------------------------------------------------------------------
 XRet XInputArchiveJson::read( const XString& name, XInt8& v )
 {
-    XString str;
-    X_RET_VAL_IF( !X_IS_SUCCESS( read( name, str ) ), X_ERROR );
-    return XStringUtil::fromString( str, v );
+    rapidjson::Value* pkValue = getJsonValue( m_pkCurNode, name );
+    X_RET_VAL_IF( !pkValue || !pkValue->IsInt(), X_ERROR );
+    v = (XInt8)pkValue->GetInt();
+    return X_SUCCESS;
 }
 
 //------------------------------------------------------------------------------
 XRet XInputArchiveJson::read( const XString& name, XInt16& v )
 {
-    XString str;
-    X_RET_VAL_IF( !X_IS_SUCCESS( read( name, str ) ), X_ERROR );
-    return XStringUtil::fromString( str, v );
+    rapidjson::Value* pkValue = getJsonValue( m_pkCurNode, name );
+    X_RET_VAL_IF( !pkValue || !pkValue->IsInt(), X_ERROR );
+    v = (XInt16)pkValue->GetInt();
+    return X_SUCCESS;
 }
 
 //------------------------------------------------------------------------------
 XRet XInputArchiveJson::read( const XString& name, XInt32& v )
 {
-    XString str;
-    X_RET_VAL_IF( !X_IS_SUCCESS( read( name, str ) ), X_ERROR );
-    return XStringUtil::fromString( str, v );
+    rapidjson::Value* pkValue = getJsonValue( m_pkCurNode, name );
+    X_RET_VAL_IF( !pkValue || !pkValue->IsInt(), X_ERROR );
+    v = (XInt32)pkValue->GetInt();
+    return X_SUCCESS;
 }
 
 //------------------------------------------------------------------------------
 XRet XInputArchiveJson::read( const XString& name, XInt64& v )
 {
-    XString str;
-    X_RET_VAL_IF( !X_IS_SUCCESS( read( name, str ) ), X_ERROR );
-    return XStringUtil::fromString( str, v );
+    rapidjson::Value* pkValue = getJsonValue( m_pkCurNode, name );
+    X_RET_VAL_IF( !pkValue || !pkValue->IsInt64(), X_ERROR );
+    v = pkValue->GetInt64();
+    return X_SUCCESS;
 }
 
 //------------------------------------------------------------------------------
 XRet XInputArchiveJson::read( const XString& name, XUInt8& v )
 {
-    XString str;
-    X_RET_VAL_IF( !X_IS_SUCCESS( read( name, str ) ), X_ERROR );
-    return XStringUtil::fromString( str, v );
+    rapidjson::Value* pkValue = getJsonValue( m_pkCurNode, name );
+    X_RET_VAL_IF( !pkValue || !pkValue->IsUint(), X_ERROR );
+    v = (XUInt8)pkValue->GetUint();
+    return X_SUCCESS;
 }
 
 //------------------------------------------------------------------------------
 XRet XInputArchiveJson::read( const XString& name, XUInt16& v )
 {
-    XString str;
-    X_RET_VAL_IF( !X_IS_SUCCESS( read( name, str ) ), X_ERROR );
-    return XStringUtil::fromString( str, v );
+    rapidjson::Value* pkValue = getJsonValue( m_pkCurNode, name );
+    X_RET_VAL_IF( !pkValue || !pkValue->IsUint(), X_ERROR );
+    v = (XUInt16)pkValue->GetUint();
+    return X_SUCCESS;
 }
 
 //------------------------------------------------------------------------------
 XRet XInputArchiveJson::read( const XString& name, XUInt32& v )
 {
-    XString str;
-    X_RET_VAL_IF( !X_IS_SUCCESS( read( name, str ) ), X_ERROR );
-    return XStringUtil::fromString( str, v );
+    rapidjson::Value* pkValue = getJsonValue( m_pkCurNode, name );
+    X_RET_VAL_IF( !pkValue || !pkValue->IsUint(), X_ERROR );
+    v = (XUInt32)pkValue->GetUint();
+    return X_SUCCESS;
 }
 
 //------------------------------------------------------------------------------
 XRet XInputArchiveJson::read( const XString& name, XUInt64& v )
 {
-    XString str;
-    X_RET_VAL_IF( !X_IS_SUCCESS( read( name, str ) ), X_ERROR );
-    return XStringUtil::fromString( str, v );
+    rapidjson::Value* pkValue = getJsonValue( m_pkCurNode, name );
+    X_RET_VAL_IF( !pkValue || !pkValue->IsUint64(), X_ERROR );
+    v = pkValue->GetUint64();
+    return X_SUCCESS;
 }
 
 //------------------------------------------------------------------------------
 XRet XInputArchiveJson::read( const XString& name, XString& v )
 {
+    rapidjson::Value* pkValue = getJsonValue( m_pkCurNode, name );
+    X_RET_VAL_IF( !pkValue || !pkValue->IsString(), X_ERROR );
+    v.assign( pkValue->GetString(), pkValue->GetStringLength() );
     return X_SUCCESS;
 }
 
 //------------------------------------------------------------------------------
 XRet XInputArchiveJson::read( const XString& name, XWString& v )
 {
-    return X_SUCCESS;
+    XString str;
+    if ( X_IS_SUCCESS( read( name, str ) ) )
+    {
+        v = XStringUtil::utf8ToWide( str );
+        return X_SUCCESS;
+    }
+    
+    return X_ERROR;
 }
 
 //------------------------------------------------------------------------------
 XRet XInputArchiveJson::readSectionBegin( const XString& name )
 {
-    return X_SUCCESS;
+    X_RET_VAL_IF( !m_pkCurNode, X_ERROR );
+    XVecJsonNodeStack* pkCurStack = (XVecJsonNodeStack*)m_pkCurNode;
+    assert( pkCurStack );
+    X_RET_VAL_IF( pkCurStack->empty(), X_ERROR );
+    rapidjson::Value* pkCurValue = pkCurStack->back();
+    assert( pkCurValue );
+    
+    rapidjson::Value::MemberIterator iter = pkCurValue->FindMember( name.c_str() );
+    if ( iter != pkCurValue->MemberEnd()
+        && iter->value.IsObject() )
+    {
+        pkCurStack->push_back( &iter->value );
+        return X_SUCCESS;
+    }
+    return X_ERROR;
 }
 
 //------------------------------------------------------------------------------
 XRet XInputArchiveJson::readSectionEnd()
 {
+    X_RET_VAL_IF( !m_pkCurNode, X_ERROR );
+    XVecJsonNodeStack* pkCurStack = (XVecJsonNodeStack*)m_pkCurNode;
+    assert( pkCurStack );
+    X_RET_VAL_IF( pkCurStack->size() < 2 , X_ERROR );
+    pkCurStack->pop_back();
     return X_SUCCESS;
 }
 
@@ -245,7 +322,10 @@ XRet XOutputArchiveJson::save( std::ostream& s )
     }
     
     rapidjson::Writer<rapidjson::StringBuffer>* pkWrite = ((rapidjson::Writer<rapidjson::StringBuffer>*)m_pkCurNode);
-    pkWrite->EndObject();
+    if ( !pkWrite->IsComplete() )
+    {
+        pkWrite->EndObject();
+    }
     rapidjson::StringBuffer* pkSB = (rapidjson::StringBuffer*)pkWrite->getOutputStream();
     assert( pkSB );
     
