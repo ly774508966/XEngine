@@ -55,27 +55,16 @@ XInputArchiveXML::~XInputArchiveXML()
 XRet XInputArchiveXML::load( XInputDataStream* pkStream )
 {
     assert( pkStream );
-    XBool bNeedDel = false;
-    XSize size = 0;
-    const XByte* pData = pkStream->getData( bNeedDel, &size );
-    XRet ret = load( pData, size );
-    if ( bNeedDel )
-    {
-        X_SAFE_DEL_ARR( pData );
-    }
-    return ret;
-}
-
-//------------------------------------------------------------------------------
-XRet XInputArchiveXML::load( const XVoid* pkData, XSize size )
-{
-    assert( pkData && size );
-    
     rapidxml::xml_document<>* pkDoc = nullptr;
+    XChar* pData = nullptr;
     try
     {
         pkDoc = X_NEW rapidxml::xml_document<>;
-        pkDoc->parse< rapidxml::parse_default >( (XChar*)pkData );
+        XSize size = pkStream->getSize();
+        pData = pkDoc->allocate_string( nullptr, size + 1 );
+        size = pkStream->read( pData, size );
+        pData[size] = 0;
+        pkDoc->parse< rapidxml::parse_default >( pData );
         
         m_pkRootNode = (XArchiveNodePtr)pkDoc;
         m_pkCurNode = m_pkRootNode;
@@ -83,7 +72,7 @@ XRet XInputArchiveXML::load( const XVoid* pkData, XSize size )
     catch( const rapidxml::parse_error& e )
     {
         X_SAFE_DEL( pkDoc );
-        X_LOG_ERROR( "failed to parse xml : " << e.what() );
+        X_LOG_ERROR( "failed to parse xml : " << e.what() << " pos : " << (XSize)( e.where<XChar>() - (XChar*)pData ) );
         return X_ERROR;
     }
     catch( const std::bad_alloc& e )
@@ -94,6 +83,14 @@ XRet XInputArchiveXML::load( const XVoid* pkData, XSize size )
     }
     
     return X_SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+XRet XInputArchiveXML::load( const XVoid* pkData, XSize size )
+{
+    assert( pkData && size );
+    XMemoryInputDataStream kMIDS( pkData, size );
+    return load( &kMIDS );
 }
 
 //------------------------------------------------------------------------------
